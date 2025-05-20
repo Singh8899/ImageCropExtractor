@@ -1,0 +1,176 @@
+# model_card: "llava-hf/llava-onevision-qwen2-0.5b-ov-hf"
+# model_card: "llava-hf/llava-onevision-qwen2-0.5b-si-hf"
+model_card: "llava-hf/llava-onevision-qwen2-7b-si-hf"
+
+fine_tune:
+  do_quant: true
+  use_lora: true
+  lora_config:
+    lora_alpha: 32
+    lora_dropout: 0.05
+    r: 32
+    bias: "none"
+    target_modules: 
+      # - "q_proj"
+      # - "v_proj"
+      # - "k_proj"
+      # - "o_proj"
+      # - "language_model.model.layers"
+      - "language_model.model.layers.0.self_attn.q_proj"
+      - "language_model.model.layers.0.self_attn.k_proj"
+      - "language_model.model.layers.0.self_attn.v_proj"
+      - "language_model.model.layers.0.self_attn.o_proj"
+      - "language_model.model.layers.1.self_attn.q_proj"
+      - "language_model.model.layers.1.self_attn.k_proj"
+      - "language_model.model.layers.1.self_attn.v_proj"
+      - "language_model.model.layers.1.self_attn.o_proj"
+      - "language_model.model.layers.2.self_attn.q_proj"
+      - "language_model.model.layers.2.self_attn.k_proj"
+      - "language_model.model.layers.2.self_attn.v_proj"
+      - "language_model.model.layers.2.self_attn.o_proj"
+      - "language_model.model.layers.3.self_attn.q_proj"
+      - "language_model.model.layers.3.self_attn.k_proj"
+      - "language_model.model.layers.3.self_attn.v_proj"
+      - "language_model.model.layers.3.self_attn.o_proj"
+      - "language_model.model.layers.4.self_attn.q_proj"
+      - "language_model.model.layers.4.self_attn.k_proj"
+      - "language_model.model.layers.4.self_attn.v_proj"
+      - "language_model.model.layers.4.self_attn.o_proj"
+      - "language_model.model.layers.5.self_attn.q_proj"
+      - "language_model.model.layers.5.self_attn.k_proj"
+      - "language_model.model.layers.5.self_attn.v_proj"
+      - "language_model.model.layers.5.self_attn.o_proj"
+      - "language_model.model.layers.6.self_attn.q_proj"
+      - "language_model.model.layers.6.self_attn.k_proj"
+      - "language_model.model.layers.6.self_attn.v_proj"
+      - "language_model.model.layers.6.self_attn.o_proj"
+      - "language_model.model.layers.7.self_attn.q_proj"
+      - "language_model.model.layers.7.self_attn.k_proj"
+      - "language_model.model.layers.7.self_attn.v_proj"
+      - "language_model.model.layers.7.self_attn.o_proj"
+      - "language_model.model.layers.8.self_attn.q_proj"
+      - "language_model.model.layers.8.self_attn.k_proj"
+      - "language_model.model.layers.8.self_attn.v_proj"
+      - "language_model.model.layers.8.self_attn.o_proj"
+      - "language_model.model.layers.9.self_attn.q_proj"
+      - "language_model.model.layers.9.self_attn.k_proj"
+      - "language_model.model.layers.9.self_attn.v_proj"
+      - "language_model.model.layers.9.self_attn.o_proj"
+      - "language_model.model.layers.10.self_attn.q_proj"
+      - "language_model.model.layers.10.self_attn.k_proj"
+      - "language_model.model.layers.10.self_attn.v_proj"
+      - "language_model.model.layers.10.self_attn.o_proj"
+      - "language_model.model.layers.11.self_attn.q_proj"
+      - "language_model.model.layers.11.self_attn.k_proj"
+      - "language_model.model.layers.11.self_attn.v_proj"
+      - "language_model.model.layers.11.self_attn.o_proj"
+      - "language_model.model.layers.12.self_attn.q_proj"
+      - "language_model.model.layers.12.self_attn.k_proj"
+      - "language_model.model.layers.12.self_attn.v_proj"
+      - "language_model.model.layers.12.self_attn.o_proj"
+      - "language_model.model.layers.13.self_attn.q_proj"
+      - "language_model.model.layers.13.self_attn.k_proj"
+      - "language_model.model.layers.13.self_attn.v_proj"
+      - "language_model.model.layers.13.self_attn.o_proj"
+      - "language_model.model.layers.14.self_attn.q_proj"
+      - "language_model.model.layers.14.self_attn.k_proj"
+      - "language_model.model.layers.14.self_attn.v_proj"
+      - "language_model.model.layers.14.self_attn.o_proj"
+      - "language_model.model.layers.15.self_attn.q_proj"
+      - "language_model.model.layers.15.self_attn.k_proj"
+      - "language_model.model.layers.15.self_attn.v_proj"
+      - "language_model.model.layers.15.self_attn.o_proj"
+      - "language_model.model.layers.16.self_attn.q_proj"
+      - "language_model.model.layers.16.self_attn.k_proj"
+      - "language_model.model.layers.16.self_attn.v_proj"
+      - "language_model.model.layers.16.self_attn.o_proj"
+      - "language_model.model.layers.17.self_attn.q_proj"
+      - "language_model.model.layers.17.self_attn.k_proj"
+      - "language_model.model.layers.17.self_attn.v_proj"
+      - "language_model.model.layers.17.self_attn.o_proj"
+      - "language_model.model.layers.18.self_attn.q_proj"
+      - "language_model.model.layers.18.self_attn.k_proj"
+      - "language_model.model.layers.18.self_attn.v_proj"
+      - "language_model.model.layers.18.self_attn.o_proj"
+      - "language_model.model.layers.19.self_attn.q_proj"
+      - "language_model.model.layers.19.self_attn.k_proj"
+      - "language_model.model.layers.19.self_attn.v_proj"
+      - "language_model.model.layers.19.self_attn.o_proj"
+      - "language_model.model.layers.20.self_attn.q_proj"
+      - "language_model.model.layers.20.self_attn.k_proj"
+      - "language_model.model.layers.20.self_attn.v_proj"
+      - "language_model.model.layers.20.self_attn.o_proj"
+      - "language_model.model.layers.21.self_attn.q_proj"
+      - "language_model.model.layers.21.self_attn.k_proj"
+      - "language_model.model.layers.21.self_attn.v_proj"
+      - "language_model.model.layers.21.self_attn.o_proj"
+      - "language_model.model.layers.22.self_attn.q_proj"
+      - "language_model.model.layers.22.self_attn.k_proj"
+      - "language_model.model.layers.22.self_attn.v_proj"
+      - "language_model.model.layers.22.self_attn.o_proj"
+      - "language_model.model.layers.23.self_attn.q_proj"
+      - "language_model.model.layers.23.self_attn.k_proj"
+      - "language_model.model.layers.23.self_attn.v_proj"
+      - "language_model.model.layers.23.self_attn.o_proj"
+      - "multi_modal_projector.linear_1"
+      - "multi_modal_projector.linear_2"
+    task_type: "CAUSAL_LM"
+  normal_tune:
+    - "multi_modal_projector.linear_1"
+    - "multi_modal_projector.linear_2"
+    - "vision_tower.vision_model.encoder.layers.25"
+
+SFTConfig:
+  num_train_epochs: 50  # Number of training epochs
+  per_device_train_batch_size: 10  # Batch size for training
+  per_device_eval_batch_size: 1  # Batch size for evaluation
+  gradient_accumulation_steps: 1  # Steps to accumulate gradients
+  optim: "adamw_torch_fused"  # Optimizer type
+  learning_rate: 2.0e-4  # Learning rate for training
+  # lr_scheduler_type: "reduce_lr_on_plateau"  # Type of learning rate scheduler
+  lr_scheduler_type: "cosine"  # Type of learning rate scheduler
+  # lr_scheduler_kwargs=scheduler_kwargs,  # Additional arguments for the scheduler
+  # Logging and evaluation
+  logging_steps: 10  # Steps interval for logging
+  eval_steps: 50  # Steps interval for evaluation
+  eval_strategy: "steps"  # Strategy for evaluation
+  # save_strategy: "steps"  # Strategy for saving the model
+  save_strategy: "best"  # Strategy for saving the model
+  save_steps: 50  # Steps interval for saving
+  save_total_limit: 3
+  metric_for_best_model: "eval_F1-score"  # Metric to evaluate the best model
+  greater_is_better: True  # Whether higher metric values are better
+  # load_best_model_at_end=True,  # Load the best model after training
+  # Mixed precision and gradient settings
+  # fp16: True  # Use mixed precision training
+  bf16: True  # Use mixed precision training
+  max_grad_norm: 0.3  # Maximum norm for gradient clipping
+  warmup_ratio: 0.03  # Ratio of total steps for warmup
+  # Hub and reporting
+  # push_to_hub=True  # Whether to push model to Hugging Face Hub
+  report_to: "tensorboard"  # Reporting tool for tracking metrics
+  # Gradient checkpointing settings
+  gradient_checkpointing: False  # Enable gradient checkpointing
+  gradient_checkpointing_kwargs:
+   use_reentrant: False  # Options for gradient checkpointing
+  # ddp_find_unused_parameters: False
+  ddp_find_unused_parameters: False
+  # ddp_broadcast_buffers: True
+  # Dataset configuration
+  dataset_text_field: ""  # Text field in dataset
+  dataset_kwargs:
+    skip_prepare_dataset: True  # Additional dataset options
+  max_seq_length: 500  # Maximum sequence length for input
+  remove_unused_columns: True
+  dataloader_drop_last: True  # Drop last batch in dataloader
+  # dataloader_persistent_workers: True
+  # dataloader_prefetch_factor: 3
+  # torch_compile=True
+  dataloader_num_workers: 16
+  # use_liger: True
+  # eval_on_start: true
+  # lr_scheduler_kwargs:
+  #   mode: "max"
+  #   factor: 0.5
+  #   patience: 10
+  
