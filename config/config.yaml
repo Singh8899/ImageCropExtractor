@@ -150,7 +150,7 @@ SFTConfig:
   # push_to_hub=True  # Whether to push model to Hugging Face Hub
   report_to: "tensorboard"  # Reporting tool for tracking metrics
   # Gradient checkpointing settings
-  gradient_checkpointing: False  # Enable gradient checkpointing
+  gradient_checkpointing: True  # Enable gradient checkpointing
   gradient_checkpointing_kwargs:
    use_reentrant: False  # Options for gradient checkpointing
   # ddp_find_unused_parameters: False

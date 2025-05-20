@@ -268,7 +268,7 @@ class Llava_model(VL_ModelHandler):
             MODEL_CARD,
             quantization_config=bnb_config if DO_QUANT else None,
             torch_dtype=torch.bfloat16,
-            attn_implementation="flash_attention_2",
+            # attn_implementation="flash_attention_2",
         )
         return base_model
 
@@ -312,10 +312,10 @@ class Llava_model(VL_ModelHandler):
             self.model = PeftModel.from_pretrained(base_model, 
                                                     checkpoint_dir,
                                                     torch_dtype=torch.bfloat16,
-                                                    attn_implementation="flash_attention_2")
+                                                    )
         else:
             self.model = LlavaOnevisionForConditionalGeneration.from_pretrained(checkpoint_dir,
-                                                                                attn_implementation="flash_attention_2").to(self.device)
+                                                                                ).to(self.device)
             # self.model = LlavaOnevisionForConditionalGeneration.from_pretrained(MODEL_CARD).to(self.device)
 
         self.processor = LlavaOnevisionProcessor.from_pretrained(MODEL_CARD, 
@@ -367,3 +367,26 @@ class Llava_model(VL_ModelHandler):
 
         trainer.train()
         trainer.save_model(training_args.output_dir)
+
+class custom_loss_func():
+    def __init__(self, tokenizer):
+        super().__init__()
+        self.tokenizer = tokenizer
+    def __call__(self, outputs, labels, num_items_in_batch=None):
+        logits = outputs.get("logits")
+        assistant_positions = self.locate_assistant_token(labels)
+        weights = torch.ones(logits.size(-1)).to(logits.device)
+        weights[self.yes_token_id] = 0.8
+        min_position = torch.min(assistant_positions[:,1])-5
+        
+        # batch_size = labels.size(0)
+        shift_logits = logits[..., :-1, :].contiguous()
+        shift_labels = labels[..., 1:].contiguous()
+        shift_logits = shift_logits[:, min_position:, :].contiguous()
+        shift_labels = shift_labels[:, min_position:].contiguous()
+        # Flatten the tokens
+        loss_fct = nn.CrossEntropyLoss(weight=weights)
+        loss = loss_fct(
+            shift_logits.view(-1, shift_logits.size(-1)), shift_labels.view(-1).to(shift_logits.device)
+        )
+        return loss

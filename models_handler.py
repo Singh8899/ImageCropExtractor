@@ -138,26 +138,7 @@ class VL_ModelHandler(ABC):
 
     def locate_assistant_token(self, array, target=77091):
         positions = torch.nonzero(array == target, as_tuple=False)
-        return positions
-
-    def compute_loss_func(self, outputs, labels, num_items_in_batch=None):
-        logits = outputs.get("logits")
-        assistant_positions = self.locate_assistant_token(labels)
-        weights = torch.ones(logits.size(-1)).to(logits.device)
-        weights[self.yes_token_id] = 0.8
-        min_position = torch.min(assistant_positions[:,1])-5
-        
-        # batch_size = labels.size(0)
-        shift_logits = logits[..., :-1, :].contiguous()
-        shift_labels = labels[..., 1:].contiguous()
-        shift_logits = shift_logits[:, min_position:, :].contiguous()
-        shift_labels = shift_labels[:, min_position:].contiguous()
-        # Flatten the tokens
-        loss_fct = nn.CrossEntropyLoss(weight=weights)
-        loss = loss_fct(
-            shift_logits.view(-1, shift_logits.size(-1)), shift_labels.view(-1).to(shift_logits.device)
-        )
-        return loss
+        return positions        
 
     @abstractmethod
     def load_vlm(self):
