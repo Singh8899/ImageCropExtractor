@@ -254,7 +254,8 @@ class Llava_model(VL_ModelHandler):
     def _load_model(self, config ):
         MODEL_CARD  = config["model_card"]
         DO_QUANT   = config["fine_tune"]["do_quant"]
-
+        print("Quanization it's enabled :", DO_QUANT)
+        print("MODEL_CARD :", MODEL_CARD)
         bnb_config = BitsAndBytesConfig(
             load_in_4bit=True,
             bnb_4bit_use_double_quant=True,
@@ -265,7 +266,8 @@ class Llava_model(VL_ModelHandler):
         base_model = LlavaOnevisionForConditionalGeneration.from_pretrained(
             MODEL_CARD,
             quantization_config=bnb_config if DO_QUANT else None,
-            torch_dtype=torch.bfloat16
+            torch_dtype=torch.bfloat16,
+            attn_implementation="flash_attention_2",
         )
         return base_model
 
@@ -297,8 +299,8 @@ class Llava_model(VL_ModelHandler):
 
         self.processor = LlavaOnevisionProcessor.from_pretrained(MODEL_CARD, 
                                                             trust_remote_code=True)
-        for name, param in self.model.named_parameters():
-            print(f"Layer: {name} | Size: {param.size()} | Requires Grad: {param.requires_grad}")
+        # for name, param in self.model.named_parameters():
+        #     print(f"Layer: {name} | Size: {param.size()} | Requires Grad: {param.requires_grad}")
         self.collator = TrainDataCollator(self.processor)
 
     def load_finetuned_vlm(self, config, checkpoint_dir, is_peft_tuned,for_pie_yolo=False, for_yolo=False):
@@ -306,9 +308,13 @@ class Llava_model(VL_ModelHandler):
         if is_peft_tuned:
             print("Loading PEFT model")
             base_model = self._load_model(config)
-            self.model = PeftModel.from_pretrained(base_model, checkpoint_dir,torch_dtype=torch.bfloat16)
+            self.model = PeftModel.from_pretrained(base_model, 
+                                                    checkpoint_dir,
+                                                    torch_dtype=torch.bfloat16,
+                                                    attn_implementation="flash_attention_2")
         else:
-            self.model = LlavaOnevisionForConditionalGeneration.from_pretrained(checkpoint_dir).to(self.device)
+            self.model = LlavaOnevisionForConditionalGeneration.from_pretrained(checkpoint_dir,
+                                                                                attn_implementation="flash_attention_2").to(self.device)
             # self.model = LlavaOnevisionForConditionalGeneration.from_pretrained(MODEL_CARD).to(self.device)
 
         self.processor = LlavaOnevisionProcessor.from_pretrained(MODEL_CARD, 
@@ -352,7 +358,7 @@ class Llava_model(VL_ModelHandler):
                     eval_dataset                    = valid_dataset,
                     data_collator                   = self.collator,
                     peft_config                     = self.lora_config if use_lora else None,
-                    tokenizer                       = self.processor.tokenizer,
+                    processing_class                = self.processor.tokenizer,
                     # compute_metrics                 = compute_metrics,
                     # preprocess_logits_for_metrics   = preprocess_logits_for_metrics,
                     # compute_loss_func               = self.compute_loss_func    

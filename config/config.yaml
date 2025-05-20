@@ -122,9 +122,9 @@ fine_tune:
 
 SFTConfig:
   num_train_epochs: 50  # Number of training epochs
-  per_device_train_batch_size: 10  # Batch size for training
+  per_device_train_batch_size: 1  # Batch size for training
   per_device_eval_batch_size: 1  # Batch size for evaluation
-  gradient_accumulation_steps: 1  # Steps to accumulate gradients
+  gradient_accumulation_steps: 2  # Steps to accumulate gradients
   optim: "adamw_torch_fused"  # Optimizer type
   learning_rate: 2.0e-4  # Learning rate for training
   # lr_scheduler_type: "reduce_lr_on_plateau"  # Type of learning rate scheduler
@@ -137,9 +137,9 @@ SFTConfig:
   # save_strategy: "steps"  # Strategy for saving the model
   save_strategy: "best"  # Strategy for saving the model
   save_steps: 50  # Steps interval for saving
-  save_total_limit: 3
-  metric_for_best_model: "eval_F1-score"  # Metric to evaluate the best model
-  greater_is_better: True  # Whether higher metric values are better
+  save_total_limit: 2
+  metric_for_best_model: "eval_loss"  # Metric to evaluate the best model
+  greater_is_better: False  # Whether higher metric values are better
   # load_best_model_at_end=True,  # Load the best model after training
   # Mixed precision and gradient settings
   # fp16: True  # Use mixed precision training
@@ -168,7 +168,7 @@ SFTConfig:
   # torch_compile=True
   dataloader_num_workers: 16
   # use_liger: True
-  # eval_on_start: true
+  eval_on_start: true
   # lr_scheduler_kwargs:
   #   mode: "max"
   #   factor: 0.5

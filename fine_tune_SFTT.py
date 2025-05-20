@@ -58,7 +58,7 @@ from trl                                import SFTConfig
 def parse_args():
     parser = argparse.ArgumentParser(description="VLM Training")
     parser.add_argument("-c",  "--config_file",         help="Configuration file.",     default="./config/config.yaml")
-    parser.add_argument("-o",  "--train_dir",           help="Train output directory",  default=None,   metavar="") 
+    parser.add_argument("-o",  "--train_dir",           help="Train output directory",  default="/root/Workspace/ImageCropExtractor/trains",   metavar="") 
     return parser.parse_args()
 
 def main(config, train_dir):
