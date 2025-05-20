@@ -56,7 +56,8 @@ Dependencies:
 """
 
 import torch
-from transformers               import LlavaOnevisionForConditionalGeneration, BitsAndBytesConfig, LlavaOnevisionProcessor
+from transformers               import BitsAndBytesConfig
+from transformers               import LlavaOnevisionProcessor, LlavaOnevisionForConditionalGeneration
 from models_handler             import VL_ModelHandler
 from peft                       import get_peft_model, LoraConfig, prepare_model_for_kbit_training, PeftModel
 from trl                        import SFTTrainer

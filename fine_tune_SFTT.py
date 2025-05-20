@@ -40,8 +40,6 @@ Usage:
     ```
 """
 
-
-
 import argparse
 import yaml
 import warnings
