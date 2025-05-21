@@ -23,7 +23,15 @@ def generate_dataset(images_dir, answers_dir, output_file):
         with open(answer_file_path, 'r', encoding='utf-8') as af:
             answer_data = json.load(af)
             # Convert the list of bounding boxes to JSON format.
-            answer_text = json.dumps(answer_data, ensure_ascii=False)
+            new_coords = []
+            for coord in answer_data:
+                new_coord = {}
+                new_coord['x1'] = coord['x']
+                new_coord['y1'] = coord['y']
+                new_coord['x2'] = coord['x']+coord['width']
+                new_coord['y2'] = coord['y']+coord['height']
+                new_coords.append(new_coord)
+            answer_text = json.dumps(new_coords, ensure_ascii=False)
 
         # Build the dataset entry
         entry = {
@@ -58,13 +66,14 @@ def prompt(height, width):
         Avoid overlapping crops unless it's necessary to focus on grouped individuals.
     Output Format:
     Return the crops as a JSON array, where each object contains:
-        "y": top-left y-coordinate
-        "x": top-left x-coordinate
-        "width": width of the crop
-        "height": height of the crop
+        "y1": top-left y-coordinate
+        "x1": top-left x-coordinate
+        "y2": bottom-right y-coordinate
+        "x2": bottom-right x-coordinate
+        
     Notes:
         Make sure the aspect ratios strictly match the required format for the number of crops selected.
-        Make sure the that y+height and x+width are within the image dimensions.
+        Make sure the that the coordinates are within the image dimensions.
         The choice of number of crops (1, 2, or 3) depends on how many distinct important persons are visually identifiable.
     """
 
