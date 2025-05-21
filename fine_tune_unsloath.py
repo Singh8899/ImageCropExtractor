@@ -1,9 +1,11 @@
+import os
 from unsloth import FastVisionModel # FastLanguageModel for LLMs
 import torch
 from dataloader.intent_dataloader_HF    import get_train_val_datasets
 from unsloth import is_bf16_supported
 from unsloth.trainer import UnslothVisionDataCollator
 from trl import SFTTrainer, SFTConfig
+from torch import nn
 
 def prepare_prompt(prompt, gt, image):
         return [
@@ -43,6 +45,121 @@ def prepare_prompt(prompt, gt, image):
         ]
 
 
+# def box_iou(pred_boxes, target_boxes, eps: float = 1e-6):
+#     """
+#     pred_boxes, target_boxes: tensors of shape (B, 4) in [x1, y1, x2, y2] format
+#     returns: Tensor of shape (B,) with the IoU for each box
+#     """
+#     # Intersection coords
+#     x1 = torch.max(pred_boxes[:, 0], target_boxes[:, 0])
+#     y1 = torch.max(pred_boxes[:, 1], target_boxes[:, 1])
+#     x2 = torch.min(pred_boxes[:, 2], target_boxes[:, 2])
+#     y2 = torch.min(pred_boxes[:, 3], target_boxes[:, 3])
+
+#     # Clamp to zero (no negative areas)
+#     inter_w = (x2 - x1).clamp(min=0)
+#     inter_h = (y2 - y1).clamp(min=0)
+#     inter_area = inter_w * inter_h
+
+#     # Areas
+#     area_pred = (pred_boxes[:, 2] - pred_boxes[:, 0]).clamp(min=0) * \
+#                 (pred_boxes[:, 3] - pred_boxes[:, 1]).clamp(min=0)
+#     area_tgt  = (target_boxes[:, 2] - target_boxes[:, 0]).clamp(min=0) * \
+#                 (target_boxes[:, 3] - target_boxes[:, 1]).clamp(min=0)
+
+#     # Union
+#     union = area_pred + area_tgt - inter_area + eps
+
+#     return inter_area / union
+
+class CustomSFTTrainer(SFTTrainer):
+    def __init__(self, *args, **kwargs):
+        super(CustomSFTTrainer, self).__init__(*args, **kwargs)
+    def compute_loss(self, model, inputs, return_outputs=False, num_items_in_batch=None):
+    
+        # get label and prediction tokens
+        labels = inputs.get("labels")
+        outputs = model(**inputs)
+        predictions = outputs.get("logits")
+
+        # decode predictions and labels
+        predicted_token_ids = torch.argmax(predictions, dim=-1)
+        decoded_predictions = [self.processing_class.decode(p.tolist()) for p in predicted_token_ids]
+        labels[labels == -100] = self.processing_class.pad_token_id
+        decoded_labels = [self.processing_class.decode(l.tolist()) for l in labels]
+
+        # function to output quantities to a list       
+        predicted_quantities, actual_quantities = quantities(decoded_predictions, decoded_labels)
+        
+        predicted_tensor = torch.tensor(predicted_quantities, device=model.device)
+        actual_tensor = torch.tensor(actual_quantities, device=model.device)
+        predicted_tensor.requires_grad_()
+        
+        # Compute MSE loss
+        loss_function = nn.MSELoss()
+        loss = loss_function(predicted_tensor, actual_tensor)
+        
+        return (loss, outputs) if return_outputs else loss
+
+
+# class CustomLossWithIoU(nn.Module):
+#     def __init__(self, tokenizer, iou_weight: float = 1.0):
+#         """
+#         iou_weight: how much to weight the IoU loss relative to token CE loss
+#         """
+#         super().__init__()
+#         self.tokenizer = tokenizer
+#         self.iou_weight = iou_weight
+#         self.ce_loss = nn.CrossEntropyLoss()
+
+#     def compute_loss(self, outputs, labels, num_items_in_batch=None):
+#         # 1) pull out everything you need
+#         labels = outputs.pop("labels")
+#         gt_boxes = outputs.pop("gt_boxes")      # your dataset must provide this
+#         outputs = model(**inputs, labels=labels)
+        
+#         # 2) text CE loss
+#         logits = outputs.logits
+#         shift_logits = logits[..., :-1, :].contiguous()
+#         shift_labels = labels[..., 1:].contiguous()
+#         ce = nn.CrossEntropyLoss()( 
+#             shift_logits.view(-1, shift_logits.size(-1)),
+#             shift_labels.view(-1)
+#         )
+        
+#         # 3) box iou loss
+#         pred_boxes = outputs.pred_boxes     # assumes your model returns this
+#         ious = box_iou(pred_boxes, gt_boxes)
+#         iou_loss = (1.0 - ious).mean()
+        
+#         loss = ce + self.args.iou_weight * iou_loss
+        
+#         return (loss, outputs) if return_outputs else loss
+    
+# class custom_loss_func():
+#     def __init__(self, tokenizer):
+#         super().__init__()
+#         self.tokenizer = tokenizer
+#     # outputs, labels, num_items_in_batch=num_items_in_batch
+#     def __call__(self, outputs, labels, num_items_in_batch=None):
+#         logits = outputs.get("logits")
+#         assistant_positions = self.locate_assistant_token(labels)
+#         weights = torch.ones(logits.size(-1)).to(logits.device)
+#         weights[self.yes_token_id] = 0.8
+#         min_position = torch.min(assistant_positions[:,1])-5
+        
+#         # batch_size = labels.size(0)
+#         shift_logits = logits[..., :-1, :].contiguous()
+#         shift_labels = labels[..., 1:].contiguous()
+#         shift_logits = shift_logits[:, min_position:, :].contiguous()
+#         shift_labels = shift_labels[:, min_position:].contiguous()
+#         # Flatten the tokens
+#         loss_fct = nn.CrossEntropyLoss(weight=weights)
+#         loss = loss_fct(
+#             shift_logits.view(-1, shift_logits.size(-1)), shift_labels.view(-1).to(shift_logits.device)
+#         )
+#         return loss
+
 model, tokenizer = FastVisionModel.from_pretrained(
     "unsloth/Qwen2.5-VL-7B-Instruct",
     load_in_4bit = True, # Use 4bit to reduce memory use. False for 16bit LoRA.
@@ -73,15 +190,15 @@ processed_dataset_test = [{ "messages" : prepare_prompt(prompt, answer, image_pi
 
 FastVisionModel.for_training(model) # Enable for training!
 
-trainer = SFTTrainer(
+trainer = CustomSFTTrainer(
     model = model,
     tokenizer = tokenizer,
     data_collator = UnslothVisionDataCollator(model, tokenizer), # Must use!
     train_dataset = processed_dataset_train,
     eval_dataset = processed_dataset_test,
     args = SFTConfig(
-        per_device_train_batch_size = 4,
-        per_device_eval_batch_size = 1,  # Batch size for evaluation
+        per_device_train_batch_size = 8,
+        per_device_eval_batch_size = 8,  # Batch size for evaluation
         do_eval=True,
         do_train=True,
         gradient_accumulation_steps = 1,
@@ -113,7 +230,7 @@ trainer = SFTTrainer(
         save_total_limit = 1
     ),
 )
-
+os.environ['UNSLOTH_RETURN_LOGITS'] = '1'
 trainer_stats = trainer.train()
 
 
