@@ -47,35 +47,67 @@ def generate_dataset(images_dir, answers_dir, output_file):
     print(f"Dataset with {len(entries)} entries has been written to {output_file}")
 
 
-def prompt(height, width):
-    return f"""You are given an image of height {height} and width {width} containing one or more people. Your task is to extract 1, 2, or 3 rectangular crops based on the number and importance of the persons in the image. The goal is to focus on the most important person(s) in the image. Follow these precise rules:
-    Cropping Rules:
-        If extracting 1 crop:
-            The crop must have a 1:1 aspect ratio (square).
-            It should center on the most important person or group.
-        If extracting 2 crops:
-            Each crop must have a 2:1 aspect ratio vertically (portrait style).
-            Each crop should center on a different important person.
-        If extracting 3 crops:
-            Two crops must be 1:1 aspect ratio.
-            One crop must be 2:1 vertical aspect ratio.
-            Each crop should focus on a different important person. Assign the vertical crop to the most prominent one if possible.
-    Importance Criteria:
-        Importance is based on a combination of centrality, face visibility, size in the image, eye contact, and pose.
-        Do not include irrelevant background or non-human subjects.
-        Avoid overlapping crops unless it's necessary to focus on grouped individuals.
-    Output Format:
-    Return the crops as a JSON array, where each object contains:
-        "y1": top-left y-coordinate
-        "x1": top-left x-coordinate
-        "y2": bottom-right y-coordinate
-        "x2": bottom-right x-coordinate
+# def prompt(height, width):
+#     return f"""You are given an image of height {height} and width {width}. Your task is to extract 1, 2, or 3 rectangular/square crops based on the number and importance of the entities in the image. The goal is to focus on the most important aspects in the image. Follow these precise rules:
+#     Cropping Rules:
+#         If extracting 1 crop:
+#             The crop must have a 1:1 aspect ratio (square).
+#             It should center on the most important person or group.
+#         If extracting 2 crops:
+#             Each crop must have a 2:1 aspect ratio vertically (portrait style).
+#             Each crop should center on a different important person.
+#         If extracting 3 crops:
+#             Two crops must be 1:1 aspect ratio.
+#             One crop must be 2:1 vertical aspect ratio.
+#             Each crop should focus on a different important person. Assign the vertical crop to the most prominent one if possible.
+#     Importance Criteria:
+#         Importance is based on a combination of centrality, face visibility, size in the image, eye contact, and pose.
+#         Do not include irrelevant background or non-human subjects.
+#         Avoid overlapping crops unless it's necessary to focus on grouped individuals.
+#     Output Format:
+#     Return the crops as a JSON array, where each object contains:
+#         "y1": top-left y-coordinate
+#         "x1": top-left x-coordinate
+#         "y2": bottom-right y-coordinate
+#         "x2": bottom-right x-coordinate
         
-    Notes:
-        Make sure the aspect ratios strictly match the required format for the number of crops selected.
-        Make sure the that the coordinates are within the image dimensions.
-        The choice of number of crops (1, 2, or 3) depends on how many distinct important persons are visually identifiable.
-    """
+#     Notes:
+#         Make sure the aspect ratios strictly match the required format for the number of crops selected.
+#         Make sure the that the coordinates are within the image dimensions.
+#         The choice of number of crops (1, 2, or 3) depends on how many distinct important persons are visually identifiable.
+#     """
+
+
+# def prompt(height, width):
+#     return f"""You are given an image of height {height} and width {width}. 
+#     Your task is to extract 1, 2, or 3 rectangular/square crops based on the number and importance of the entities in the image. 
+#     The goal is to focus on the most important aspects in the image.
+#     Be aware that the crops will be used for a collage of 1:1 or 3:4 or 4:3 aspect ratio images.
+#     Importance Criteria:
+#         Importance is based on a combination of centrality, face visibility, size in the image, eye contact, and pose.
+#         Avoid overlapping crops unless it's necessary to focus on grouped individuals.
+#     Notes:
+#         Make sure that the coordinates are within the image dimensions.
+#         The choice of number of crops (1, 2, or 3) depends on how many distinct important entities are visually identifiable.
+#     """
+
+def prompt(height, width):
+    return f"""
+You are given an image of dimensions {width}x{height}. 
+Your job is to select 1, 2, or 3 rectangular/square crops that highlight the most important entity(s), so they can be assembled into a final collage at 1:1, 3:4, or 4:3 aspect ratio. 
+
+Key points:
+1. Number of crops: choose 1-3 based on how many distinct, high-importance entities are present.
+2. Importance factors: centrality, visible faces, size in frame, eye contact, pose, and grouping.
+3. Crop placement: avoid overlap unless multiple people or entities are intentionally framed together.
+4. Coordinate constraints: all crop boxes must lie fully within the original image bounds.
+5. Final collage: selected crops will be resized and arranged to exactly fill a 1:1, 3:4, or 4:3 canvas—crops themselves do not need to match those aspect ratios.
+Return the crops as a JSON array, where each object contains:
+    "y1": top-left y-coordinate
+    "x1": top-left x-coordinate
+    "y2": bottom-right y-coordinate
+    "x2": bottom-right x-coordinate
+"""
 
 if __name__ == '__main__':
     images_dir = os.path.join(os.getcwd(), "dataset/photo")

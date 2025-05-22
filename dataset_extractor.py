@@ -17,7 +17,7 @@ def extract_zip(zip_path, extract_to=None):
 
 if __name__ == "__main__":
 
-    zip1 = os.path.join(os.getcwd(), "photo-20250519T115650Z-1-001.zip")
-    zip2 = os.path.join(os.getcwd(), "bounding_boxes-20250519T115648Z-1-001.zip")
+    zip1 = os.path.join(os.getcwd(), "photo_2-20250522T154451Z-1-001.zip")
+    zip2 = os.path.join(os.getcwd(), "bounding_boxes_2-20250522T154449Z-1-001.zip")
     extract_zip(zip1)
     extract_zip(zip2)

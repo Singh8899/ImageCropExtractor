@@ -28,6 +28,7 @@ def get_train_val_datasets(split_ratio=0.8):
   dataset = DiegoDataset()
   train_size = int(len(dataset) * split_ratio)
   val_size = len(dataset) - train_size
+  torch.manual_seed(42)
   train_dataset, val_dataset = torch.utils.data.random_split(dataset, [train_size, val_size])
   return train_dataset, val_dataset
 
