@@ -48,8 +48,8 @@ processed_dataset_test = [(prepare_prompt(prompt, answer), image_pil) for image_
 
 
 model, tokenizer = FastVisionModel.from_pretrained(
-    model_name = "/root/Workspace/ImageCropExtractor/outputs_new_promt/checkpoint-290", # YOUR MODEL YOU USED FOR TRAINING
-    load_in_4bit = True, # Set to False for 16bit LoRA
+    model_name = "/root/Workspace/ImageCropExtractor/outputs_dataset_900/2/checkpoint-200", # YOUR MODEL YOU USED FOR TRAINING
+    load_in_4bit = False, # Set to False for 16bit LoRA
 )
 
 FastVisionModel.for_inference(model) # Enable for inference!
@@ -92,5 +92,5 @@ for i, pack in enumerate(processed_dataset_test):
         x2 = gt_bbox["x2"]
         y2 = gt_bbox["y2"]
         draw.rectangle([x1, y1, x2, y2], outline="green", width=3)
-    os.makedirs("test_output3", exist_ok=True)
-    image_pil.save(f"test_output3/{i}.png")
+    os.makedirs("test_output1", exist_ok=True)
+    image_pil.save(f"test_output1/{i}.png")

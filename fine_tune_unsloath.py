@@ -155,9 +155,9 @@ def prepare_prompt(prompt, gt, image):
 #     union = area_pred + area_tgt - inter_area + eps
 
 #     return inter_area / union
-def locate_assistant_token(array, target=77091):
-    positions = torch.nonzero(array == target, as_tuple=False)
-    return positions
+# def locate_assistant_token(array, target=77091):
+#     positions = torch.nonzero(array == target, as_tuple=False)
+#     return positions
 
 # class CustomSFTTrainer(SFTTrainer):
 #     def __init__(self, *args, **kwargs):
@@ -288,7 +288,7 @@ def locate_assistant_token(array, target=77091):
 
 model, tokenizer = FastVisionModel.from_pretrained(
     "unsloth/Qwen2.5-VL-7B-Instruct",
-    load_in_4bit = True, # Use 4bit to reduce memory use. False for 16bit LoRA.
+    load_in_4bit = False, # Use 4bit to reduce memory use. False for 16bit LoRA.
     use_gradient_checkpointing = "unsloth", # True or "unsloth" for long context
 )
 
@@ -340,7 +340,7 @@ trainer = SFTTrainer(
         weight_decay = 0.01,
         lr_scheduler_type = "linear",
         seed = 3407,
-        output_dir = "outputs_dataset_900",
+        output_dir = "outputs_dataset_900/2",
         report_to = "tensorboard",     # For Weights and Biases
 
         # You MUST put the below items for vision finetuning:
@@ -355,7 +355,6 @@ trainer = SFTTrainer(
         save_total_limit = 1
     ),
 )
-# os.environ['UNSLOTH_RETURN_LOGITS'] = '1'
 trainer_stats = trainer.train()
 
 # FastVisionModel.for_inference(model) # Enable for inference!
@@ -378,3 +377,6 @@ trainer_stats = trainer.train()
 # text_streamer = TextStreamer(tokenizer, skip_prompt = True)
 # _ = model.generate(**inputs, streamer = text_streamer, max_new_tokens = 128,
 #                    use_cache = True, temperature = 0.1, min_p = 0.1)
+
+
+

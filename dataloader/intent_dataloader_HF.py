@@ -24,7 +24,7 @@ class DiegoDataset(Dataset):
     answer = self.dataset_list[idx]['answer'] 
     return image_pil, prompt, answer
 
-def get_train_val_datasets(split_ratio=0.8):
+def get_train_val_datasets(split_ratio=0.95):
   dataset = DiegoDataset()
   train_size = int(len(dataset) * split_ratio)
   val_size = len(dataset) - train_size
