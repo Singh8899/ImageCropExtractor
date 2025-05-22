@@ -48,12 +48,12 @@ processed_dataset_test = [(prepare_prompt(prompt, answer), image_pil) for image_
 
 
 model, tokenizer = FastVisionModel.from_pretrained(
-    model_name = "/root/Workspace/ImageCropExtractor/outputs_dataset_900/2/checkpoint-200", # YOUR MODEL YOU USED FOR TRAINING
+    model_name = "/root/Workspace/ImageCropExtractor/outputs_dataset_900/2/checkpoint-360", # YOUR MODEL YOU USED FOR TRAINING
     load_in_4bit = False, # Set to False for 16bit LoRA
 )
 
 FastVisionModel.for_inference(model) # Enable for inference!
-for i, pack in enumerate(processed_dataset_test):
+for i, pack in enumerate(processed_dataset_test[28:]):
     prompt, image_pil = pack
     messages = [
         prompt[:2]
@@ -64,6 +64,7 @@ for i, pack in enumerate(processed_dataset_test):
     inputs = tokenizer(
         image_pil,
         input_text,
+        max_length=128000,
         add_special_tokens = False,
         return_tensors = "pt",
     ).to("cuda")
@@ -74,6 +75,7 @@ for i, pack in enumerate(processed_dataset_test):
                     use_cache = True, do_sample = False)
 
     text = tokenizer.batch_decode(pred_coord[:, inputs["input_ids"].shape[-1]:], skip_special_tokens=True)[0]
+    print(text)
     result_dict = json.loads(text)
 
     # Assuming result_dict contains bounding boxes in the format:
