@@ -327,7 +327,7 @@ trainer = SFTTrainer(
         do_eval=True,
         do_train=True,
         gradient_accumulation_steps = 1,
-        warmup_steps = 5,
+        warmup_steps = 10,
         max_steps = 500,
         eval_steps = 10,  # Steps interval for evaluation
         eval_strategy = "steps",  # Strategy for evaluation
@@ -339,8 +339,8 @@ trainer = SFTTrainer(
         optim = "adamw_torch_fused",
         weight_decay = 0.01,
         lr_scheduler_type = "linear",
-        seed = 3407,
-        output_dir = "outputs_dataset_900-3",
+        seed = 69,
+        output_dir = "outputs_dataset",
         report_to = "tensorboard",     # For Weights and Biases
 
         # You MUST put the below items for vision finetuning:

@@ -24,11 +24,11 @@ class DiegoDataset(Dataset):
     answer = self.dataset_list[idx]['answer'] 
     return image_pil, prompt, answer
 
-def get_train_val_datasets(split_ratio=0.95):
+def get_train_val_datasets(split_ratio=0.967):
   dataset = DiegoDataset()
   train_size = int(len(dataset) * split_ratio)
   val_size = len(dataset) - train_size
-  torch.manual_seed(42)
+  torch.manual_seed(69)
   train_dataset, val_dataset = torch.utils.data.random_split(dataset, [train_size, val_size])
   return train_dataset, val_dataset
 
