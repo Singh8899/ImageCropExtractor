@@ -10,6 +10,28 @@ from torch import nn
 import re
 
 import torch
+
+def locate_assistant_token( array, target=77091):
+    positions = torch.nonzero(array == target, as_tuple=False)
+    return positions
+
+def compute_loss_func(outputs, labels, num_items_in_batch=None):
+    logits = outputs.get("logits")
+    assistant_positions = locate_assistant_token(labels)
+    min_position = torch.min(assistant_positions[:,1])-5
+    
+    # batch_size = labels.size(0)
+    shift_logits = logits[..., :-1, :].contiguous()
+    shift_labels = labels[..., 1:].contiguous()
+    shift_logits = shift_logits[:, min_position:, :].contiguous()
+    shift_labels = shift_labels[:, min_position:].contiguous()
+    # Flatten the tokens
+    loss_fct = nn.CrossEntropyLoss()
+    loss = loss_fct(
+        shift_logits.view(-1, shift_logits.size(-1)), shift_labels.view(-1).to(shift_logits.device)
+    )
+    return loss
+
 # import torch.nn.functional as F
 # from scipy.optimize import linear_sum_assignment
 # from torchmetrics.functional import generalized_box_iou
@@ -288,22 +310,23 @@ def prepare_prompt(prompt, gt, image):
 
 model, tokenizer = FastVisionModel.from_pretrained(
     "unsloth/Qwen2.5-VL-7B-Instruct",
-    load_in_4bit = False, # Use 4bit to reduce memory use. False for 16bit LoRA.
+    load_in_4bit = True, # Use 4bit to reduce memory use. False for 16bit LoRA.
     use_gradient_checkpointing = "unsloth", # True or "unsloth" for long context
+    max_seq_length = 50000, # Set to a large number for long context
 )
 
 model = FastVisionModel.get_peft_model(
     model,
-    finetune_vision_layers     = True, # False if not finetuning vision layers
+    finetune_vision_layers     = False, # False if not finetuning vision layers
     finetune_language_layers   = True, # False if not finetuning language layers
     finetune_attention_modules = True, # False if not finetuning attention layers
     finetune_mlp_modules       = True, # False if not finetuning MLP layers
 
-    r = 16,           # The larger, the higher the accuracy, but might overfit
-    lora_alpha = 16,  # Recommended alpha == r at least
+    r = 32,           # The larger, the higher the accuracy, but might overfit
+    lora_alpha = 32,  # Recommended alpha == r at least
     lora_dropout = 0,
     bias = "none",
-    random_state = 3407,
+    random_state = 69,
     use_rslora = False,  # We support rank stabilized LoRA
     loftq_config = None, # And LoftQ
     # target_modules = "all-linear", # Optional now! Can specify a list if needed
@@ -318,18 +341,24 @@ FastVisionModel.for_training(model) # Enable for training!
 trainer = SFTTrainer(
     model = model,
     tokenizer = tokenizer,
-    data_collator = UnslothVisionDataCollator(model, tokenizer), # Must use!
+    data_collator = UnslothVisionDataCollator(model, 
+                                              tokenizer,
+                                              resize="max",
+                                              train_on_responses_only=True,
+                                              instruction_part="<|im_start|>system",
+                                              response_part="<|im_start|>assistant"),
     train_dataset = processed_dataset_train,
     eval_dataset = processed_dataset_test,
+    # compute_loss_func = compute_loss_func,
     args = SFTConfig(
-        per_device_train_batch_size = 8,
-        per_device_eval_batch_size = 8,  # Batch size for evaluation
+        per_device_train_batch_size = 4,
+        per_device_eval_batch_size = 4,  # Batch size for evaluation
         do_eval=True,
         do_train=True,
         gradient_accumulation_steps = 1,
-        warmup_steps = 10,
-        max_steps = 500,
-        eval_steps = 10,  # Steps interval for evaluation
+        warmup_steps = 60,
+        max_steps = 3000,
+        eval_steps = 60,  # Steps interval for evaluation
         eval_strategy = "steps",  # Strategy for evaluation
         # num_train_epochs = 5, # Set this instead of max_steps for full training runs
         learning_rate = 2e-4,
@@ -340,7 +369,7 @@ trainer = SFTTrainer(
         weight_decay = 0.01,
         lr_scheduler_type = "linear",
         seed = 69,
-        output_dir = "outputs_dataset",
+        output_dir = "outputs_dataset5_on comp",
         report_to = "tensorboard",     # For Weights and Biases
 
         # You MUST put the below items for vision finetuning:
@@ -348,7 +377,7 @@ trainer = SFTTrainer(
         dataset_text_field = "",
         dataset_kwargs = {"skip_prepare_dataset": True},
         dataset_num_proc = 8,
-        max_seq_length = 5000,
+        max_seq_length = 10000,
         save_strategy = "best",
         metric_for_best_model = "eval_loss",
         greater_is_better = False,

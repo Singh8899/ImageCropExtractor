@@ -48,12 +48,12 @@ processed_dataset_test = [(prepare_prompt(prompt, answer), image_pil) for image_
 
 
 model, tokenizer = FastVisionModel.from_pretrained(
-    model_name = "/root/Workspace/ImageCropExtractor/outputs_dataset_900/2/checkpoint-360", # YOUR MODEL YOU USED FOR TRAINING
+    model_name = "/root/ImageCropExtractor/outputs_dataset3/checkpoint-240", # YOUR MODEL YOU USED FOR TRAINING
     load_in_4bit = False, # Set to False for 16bit LoRA
 )
 
 FastVisionModel.for_inference(model) # Enable for inference!
-for i, pack in enumerate(processed_dataset_test[28:]):
+for i, pack in enumerate(processed_dataset_test):
     prompt, image_pil = pack
     messages = [
         prompt[:2]
