@@ -4,6 +4,41 @@ from dataloader.intent_dataloader_HF    import get_train_val_datasets
 import json
 from PIL import ImageDraw
 
+# def prepare_prompt(prompt, gt):
+#         return [
+#             {
+#                 "role": "system",
+#                 "content": [
+#                     {
+#                         "type": "text",
+#                         "text": """You are an advanced vision-language model specialized in annotating images.
+#                         You are a vision-language model. Analyze the provided image and respond **only in JSON** format. 
+#                         Do not include any explanation, description, or text outside of the JSON"""
+#                     }
+#                 ]
+#             },
+#             {
+#                 "role": "user",
+#                 "content": [
+#                     {
+#                         "type": "image"
+#                     },
+#                     {
+#                         "type": "text",
+#                         "text": prompt
+#                     }
+#                 ]
+#             },
+#             {
+#                 "role": "assistant",
+#                 "content": [
+#                     {
+#                         "type": "text", 
+#                         "text": gt
+#                     }
+#                 ],
+#             },
+#         ]
 def prepare_prompt(prompt, gt):
         return [
             {
@@ -13,7 +48,13 @@ def prepare_prompt(prompt, gt):
                         "type": "text",
                         "text": """You are an advanced vision-language model specialized in annotating images.
                         You are a vision-language model. Analyze the provided image and respond **only in JSON** format. 
-                        Do not include any explanation, description, or text outside of the JSON"""
+                        Do not include any explanation, description, or text outside of the JSON
+                        Output Format:
+                        Return the crops as a JSON array, where each object contains:
+                            "y1": top-left y-coordinate
+                            "x1": top-left x-coordinate
+                            "y2": bottom-right y-coordinate
+                            "x2": bottom-right x-coordinate"""
                     }
                 ]
             },
@@ -41,15 +82,15 @@ def prepare_prompt(prompt, gt):
         ]
 
 
-
 _, dataset_test = get_train_val_datasets()
 processed_dataset_test = [(prepare_prompt(prompt, answer), image_pil) for image_pil, prompt, answer in dataset_test]
 
 
 
 model, tokenizer = FastVisionModel.from_pretrained(
-    model_name = "/root/ImageCropExtractor/outputs_dataset3/checkpoint-240", # YOUR MODEL YOU USED FOR TRAINING
-    load_in_4bit = False, # Set to False for 16bit LoRA
+    "Singh8898/Cropper", # YOUR MODEL YOU USED FOR TRAINING
+    token = "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",
+    load_in_4bit = True, # Set to False for 16bit LoRA
 )
 
 FastVisionModel.for_inference(model) # Enable for inference!
@@ -94,5 +135,5 @@ for i, pack in enumerate(processed_dataset_test):
         x2 = gt_bbox["x2"]
         y2 = gt_bbox["y2"]
         draw.rectangle([x1, y1, x2, y2], outline="green", width=3)
-    os.makedirs("test_output1", exist_ok=True)
-    image_pil.save(f"test_output1/{i}.png")
+    os.makedirs("test_output2", exist_ok=True)
+    image_pil.save(f"test_output2/{i}.png")
