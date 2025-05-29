@@ -26,10 +26,10 @@ def generate_dataset(images_dir, answers_dir, output_file):
             new_coords = []
             for coord in answer_data:
                 new_coord = {}
-                new_coord['x1'] = coord['x']
-                new_coord['y1'] = coord['y']
-                new_coord['x2'] = coord['x']+coord['width']
-                new_coord['y2'] = coord['y']+coord['height']
+                new_coord['x1'] = max(0,coord['x'])
+                new_coord['y1'] = max(0,coord['y'])
+                new_coord['x2'] = min(coord['x']+coord['width'],width)
+                new_coord['y2'] = min(coord['y']+coord['height'],height)
                 new_coords.append(new_coord)
             answer_text = json.dumps(new_coords, ensure_ascii=False)
 
@@ -59,7 +59,7 @@ def prompt(height, width):
         If extracting 3 crops:
             Two crops must be 1:1 aspect ratio.
             One crop must be 2:1 vertical aspect ratio.
-            Each crop should focus on a different important person. Assign the vertical crop to the most prominent one if possible.
+            Each crop should focus on a different important entities. Assign the vertical crop to the most prominent one if possible.
     Importance Criteria:
         Importance is based on a combination of centrality, face visibility, size in the image, eye contact, and pose.
         Do not include irrelevant background or non-human subjects.
