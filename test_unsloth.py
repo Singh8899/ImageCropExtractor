@@ -54,7 +54,9 @@ def prepare_prompt(prompt, gt):
                             "y1": top-left y-coordinate
                             "x1": top-left x-coordinate
                             "y2": bottom-right y-coordinate
-                            "x2": bottom-right x-coordinate"""
+                            "x2": bottom-right x-coordinate
+                        The array should contain at most 3 objects."""
+                        
                     }
                 ]
             },
@@ -88,7 +90,7 @@ processed_dataset_test = [(prepare_prompt(prompt, answer), image_pil) for image_
 
 
 model, tokenizer = FastVisionModel.from_pretrained(
-    "/root/ImageCropExtractor/outputs_dataset5_on_comp/checkpoint-360", # YOUR MODEL YOU USED FOR TRAINING
+    "/root/ImageCropExtractor/outputs_dataset5_on_comp/checkpoint-660", # YOUR MODEL YOU USED FOR TRAINING
     load_in_4bit = True, # Set to False for 16bit LoRA
 )
 
@@ -134,5 +136,5 @@ for i, pack in enumerate(processed_dataset_test):
         x2 = gt_bbox["x2"]
         y2 = gt_bbox["y2"]
         draw.rectangle([x1, y1, x2, y2], outline="green", width=3)
-    os.makedirs("test_output2", exist_ok=True)
-    image_pil.save(f"test_output2/{i}.png")
+    os.makedirs("test_output4", exist_ok=True)
+    image_pil.save(f"test_output4/{i}.png")

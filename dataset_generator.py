@@ -28,8 +28,8 @@ def generate_dataset(images_dir, answers_dir, output_file):
                 new_coord = {}
                 new_coord['x1'] = max(0,coord['x'])
                 new_coord['y1'] = max(0,coord['y'])
-                new_coord['x2'] = min(coord['x']+coord['width'],width)
-                new_coord['y2'] = min(coord['y']+coord['height'],height)
+                new_coord['x2'] = min(new_coord['x1']+coord['width'],width)
+                new_coord['y2'] = min(new_coord['y1']+coord['height'],height)
                 new_coords.append(new_coord)
             answer_text = json.dumps(new_coords, ensure_ascii=False)
 
