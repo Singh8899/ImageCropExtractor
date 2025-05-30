@@ -1,3 +1,0 @@
-runpod
-unsloth==2025.5.7
-

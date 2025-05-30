@@ -3,15 +3,14 @@ from io import BytesIO
 import os
 import json
 from unsloth import FastVisionModel
-from intent_dataloader_HF import get_train_val_datasets
 from PIL import ImageDraw
 from PIL import Image, ImageDraw
 
 class CropInference:
     def __init__(self, model_path="/root/Workspace/Cropper/checkpoint-660", load_in_4bit=True):
-        self.model, self.tokenizer = FastVisionModel.from_pretrained(
-            model_path,
-            load_in_4bit=load_in_4bit
+        self.model, self.tokenizer =  FastVisionModel.from_pretrained(
+            "/root/Workspace/ImageCropExtractor/outputs_checkpoint/checkpoint-300", # YOUR MODEL YOU USED FOR TRAINING
+            load_in_4bit = True, # Set to False for 16bit LoRA
         )
         FastVisionModel.for_inference(self.model)
 
@@ -46,15 +45,14 @@ class CropInference:
             The choice of number of crops (1, 2, or 3) depends on how many distinct important entities are visually identifiable.
         """
 
-
     def prepare_prompt(self, image):
-        return [
-            {
-                "role": "system",
-                "content": [
-                    {
-                        "type": "text",
-                        "text": """You are an advanced vision-language model specialized in annotating images.
+            return [
+                {
+                    "role": "system",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": """You are an advanced vision-language model specialized in annotating images.
                             You are a vision-language model. Analyze the provided image and respond **only in JSON** format. 
                             Do not include any explanation, description, or text outside of the JSON
                             Output Format:
@@ -62,17 +60,15 @@ class CropInference:
                                 "y1": top-left y-coordinate
                                 "x1": top-left x-coordinate
                                 "y2": bottom-right y-coordinate
-                                "x2": bottom-right x-coordinate
-                            The array should contain at most 3 objects.""",
-                    }
-                ],
-            },
-            {
-                "role": "user",
-                "content": [{"type": "image"}, {"type": "text", "text": self.get_prompt(image.height, image.width)}],
-            },
-        ]
-
+                                "x2": bottom-right x-coordinate"""
+                        }
+                    ]
+                },
+                {
+                    "role": "user",
+                    "content": [{"type": "image"}, {"type": "text", "text": self.get_prompt(image.height, image.width)}]
+                }
+            ]
     def infer(self, image: str):
         image_bytes = base64.b64decode(image)
         image_pil = Image.open(BytesIO(image_bytes)).convert("RGB")

@@ -1,44 +1,9 @@
 import os
 from unsloth import FastVisionModel
-from dataloader.intent_dataloader_HF    import get_train_val_datasets
+from dataloader.intent_dataloader_HF    import get_test_dataset
 import json
 from PIL import ImageDraw
 
-# def prepare_prompt(prompt, gt):
-#         return [
-#             {
-#                 "role": "system",
-#                 "content": [
-#                     {
-#                         "type": "text",
-#                         "text": """You are an advanced vision-language model specialized in annotating images.
-#                         You are a vision-language model. Analyze the provided image and respond **only in JSON** format. 
-#                         Do not include any explanation, description, or text outside of the JSON"""
-#                     }
-#                 ]
-#             },
-#             {
-#                 "role": "user",
-#                 "content": [
-#                     {
-#                         "type": "image"
-#                     },
-#                     {
-#                         "type": "text",
-#                         "text": prompt
-#                     }
-#                 ]
-#             },
-#             {
-#                 "role": "assistant",
-#                 "content": [
-#                     {
-#                         "type": "text", 
-#                         "text": gt
-#                     }
-#                 ],
-#             },
-#         ]
 def prepare_prompt(prompt, gt):
         return [
             {
@@ -54,9 +19,7 @@ def prepare_prompt(prompt, gt):
                             "y1": top-left y-coordinate
                             "x1": top-left x-coordinate
                             "y2": bottom-right y-coordinate
-                            "x2": bottom-right x-coordinate
-                        The array should contain at most 3 objects."""
-                        
+                            "x2": bottom-right x-coordinate"""
                     }
                 ]
             },
@@ -84,13 +47,13 @@ def prepare_prompt(prompt, gt):
         ]
 
 
-_, dataset_test = get_train_val_datasets()
+
+_, dataset_test = get_test_dataset()
 processed_dataset_test = [(prepare_prompt(prompt, answer), image_pil) for image_pil, prompt, answer in dataset_test]
 
 
-
 model, tokenizer = FastVisionModel.from_pretrained(
-    "Singh8898/CropperNew", # YOUR MODEL YOU USED FOR TRAINING
+    "/root/Workspace/ImageCropExtractor/outputs_checkpoint/checkpoint-400", # YOUR MODEL YOU USED FOR TRAINING
     load_in_4bit = True, # Set to False for 16bit LoRA
 )
 
@@ -136,5 +99,5 @@ for i, pack in enumerate(processed_dataset_test):
         x2 = gt_bbox["x2"]
         y2 = gt_bbox["y2"]
         draw.rectangle([x1, y1, x2, y2], outline="green", width=3)
-    os.makedirs("test_output4", exist_ok=True)
-    image_pil.save(f"test_output4/{i}.png")
+    os.makedirs("test_output400", exist_ok=True)
+    image_pil.save(f"test_output400/{i}.png")
