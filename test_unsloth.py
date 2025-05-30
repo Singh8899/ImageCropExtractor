@@ -90,7 +90,7 @@ processed_dataset_test = [(prepare_prompt(prompt, answer), image_pil) for image_
 
 
 model, tokenizer = FastVisionModel.from_pretrained(
-    "/root/ImageCropExtractor/outputs_dataset5_on_comp/checkpoint-660", # YOUR MODEL YOU USED FOR TRAINING
+    "Singh8898/CropperNew", # YOUR MODEL YOU USED FOR TRAINING
     load_in_4bit = True, # Set to False for 16bit LoRA
 )
 

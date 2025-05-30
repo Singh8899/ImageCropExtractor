@@ -1,16 +1,13 @@
 import os
 import torch
 import json
-
 from torch.utils.data   import Dataset
 from PIL                import Image
-
-
 
 class DiegoDataset(Dataset):
   def __init__(self):
     # Assuming dataset/dataset.json is relative to the project root
-    dataset_path = os.path.join("dataset", "dataset.json")
+    dataset_path = os.path.join("/root/Workspace/ImageCropExtractor/dataset/dataset.json")
     with open(dataset_path, "r") as json_file:
       self.dataset_list = json.load(json_file)
     
@@ -18,7 +15,7 @@ class DiegoDataset(Dataset):
     return len(self.dataset_list)
 
   def __getitem__(self, idx):
-    image_path = os.path.join("dataset", "photo", self.dataset_list[idx]['image'])
+    image_path = os.path.join("/root/Workspace/ImageCropExtractor/dataset/photo", self.dataset_list[idx]['image'])
     image_pil = Image.open(image_path)
     prompt = self.dataset_list[idx]['prompt']
     answer = self.dataset_list[idx]['answer'] 
