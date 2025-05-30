@@ -3,11 +3,18 @@ import json
 import argparse
 from PIL import Image
 
+
 def generate_dataset(images_dir, answers_dir, output_file):
     entries = []
-    
+
     # Get sorted list of image files assuming they are .jpg files.
-    image_files = sorted([f for f in os.listdir(images_dir) if f.lower().endswith(('.jpg', '.jpeg', '.png'))])
+    image_files = sorted(
+        [
+            f
+            for f in os.listdir(images_dir)
+            if f.lower().endswith((".jpg", ".jpeg", ".png"))
+        ]
+    )
     for image_file in image_files:
         base_name, _ = os.path.splitext(image_file)
         image_path = os.path.join(images_dir, image_file)
@@ -15,21 +22,21 @@ def generate_dataset(images_dir, answers_dir, output_file):
             height = img.height
             width = img.width
         # Build the expected answer file path (assumes .json extension)
-        answer_file_path = os.path.join(answers_dir, base_name + '.json')
+        answer_file_path = os.path.join(answers_dir, base_name + ".json")
         if not os.path.exists(answer_file_path):
             print(f"Warning: Answer file for image {image_file} not found. Skipping.")
             continue
 
-        with open(answer_file_path, 'r', encoding='utf-8') as af:
+        with open(answer_file_path, "r", encoding="utf-8") as af:
             answer_data = json.load(af)
             # Convert the list of bounding boxes to JSON format.
             new_coords = []
             for coord in answer_data:
                 new_coord = {}
-                new_coord['x1'] = max(0,coord['x'])
-                new_coord['y1'] = max(0,coord['y'])
-                new_coord['x2'] = min(new_coord['x1']+coord['width'],width)
-                new_coord['y2'] = min(new_coord['y1']+coord['height'],height)
+                new_coord["x1"] = max(0, coord["x"])
+                new_coord["y1"] = max(0, coord["y"])
+                new_coord["x2"] = min(new_coord["x1"] + coord["width"], width)
+                new_coord["y2"] = min(new_coord["y1"] + coord["height"], height)
                 new_coords.append(new_coord)
             answer_text = json.dumps(new_coords, ensure_ascii=False)
 
@@ -38,11 +45,11 @@ def generate_dataset(images_dir, answers_dir, output_file):
             "id": base_name.zfill(8),
             "image": image_file,
             "prompt": prompt(height, width),
-            "answer": answer_text
+            "answer": answer_text,
         }
         entries.append(entry)
 
-    with open(output_file, 'w', encoding='utf-8') as out_f:
+    with open(output_file, "w", encoding="utf-8") as out_f:
         json.dump(entries, out_f, ensure_ascii=False, indent=2)
     print(f"Dataset with {len(entries)} entries has been written to {output_file}")
 
@@ -80,8 +87,8 @@ def prompt(height, width):
 
 
 # def prompt(height, width):
-#     return f"""You are given an image of height {height} and width {width}. 
-#     Your task is to extract 1, 2, or 3 rectangular/square crops based on the number and importance of the entities in the image. 
+#     return f"""You are given an image of height {height} and width {width}.
+#     Your task is to extract 1, 2, or 3 rectangular/square crops based on the number and importance of the entities in the image.
 #     The goal is to focus on the most important aspects in the image.
 #     Be aware that the crops will be used for a collage of 1:1 or 3:4 or 4:3 aspect ratio images.
 #     Importance Criteria:
@@ -94,8 +101,8 @@ def prompt(height, width):
 
 # def prompt(height, width):
 #     return f"""
-# You are given an image of dimensions {width}x{height}. 
-# Your job is to select 1, 2, or 3 rectangular/square crops that highlight the most important entity(s), so they can be assembled into a final collage at 1:1 aspect ratio. 
+# You are given an image of dimensions {width}x{height}.
+# Your job is to select 1, 2, or 3 rectangular/square crops that highlight the most important entity(s), so they can be assembled into a final collage at 1:1 aspect ratio.
 
 # Key points:
 # 1. Number of crops: choose 1-3 based on how many distinct, high-importance entities are present.
@@ -112,8 +119,7 @@ def prompt(height, width):
 # """
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     images_dir = os.path.join(os.getcwd(), "dataset/photo")
     answers_dir = os.path.join(os.getcwd(), "dataset/bounding_boxes")
     output_file = os.path.join(os.getcwd(), "dataset/dataset.json")

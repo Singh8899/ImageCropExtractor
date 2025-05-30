@@ -2,6 +2,7 @@ import runpod
 from model import CropInference
 import json
 
+
 def handler(event):
     #   This function processes incoming requests to your Serverless endpoint.
     #

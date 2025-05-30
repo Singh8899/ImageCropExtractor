@@ -19,7 +19,7 @@
 # #     logits = outputs.get("logits")
 # #     assistant_positions = locate_assistant_token(labels)
 # #     min_position = torch.min(assistant_positions[:,1])-5
-    
+
 # #     # batch_size = labels.size(0)
 # #     shift_logits = logits[..., :-1, :].contiguous()
 # #     shift_labels = labels[..., 1:].contiguous()
@@ -40,7 +40,7 @@
 # #                     {
 # #                         "type": "text",
 # #                         "text": """You are an advanced vision-language model specialized in annotating images.
-# #                         You are a vision-language model. Analyze the provided image and respond **only in JSON** format. 
+# #                         You are a vision-language model. Analyze the provided image and respond **only in JSON** format.
 # #                         Do not include any explanation, description, or text outside of the JSON
 # #                         Output Format:
 # #                         Return the crops as a JSON array, where each object contains:
@@ -68,13 +68,12 @@
 # #                 "role": "assistant",
 # #                 "content": [
 # #                     {
-# #                         "type": "text", 
+# #                         "type": "text",
 # #                         "text": gt
 # #                     }
 # #                 ],
 # #             },
 # #         ]
-
 
 
 # # model, tokenizer = FastVisionModel.from_pretrained(
@@ -109,7 +108,7 @@
 # # trainer = SFTTrainer(
 # #     model = model,
 # #     tokenizer = tokenizer,
-# #     data_collator = UnslothVisionDataCollator(model, 
+# #     data_collator = UnslothVisionDataCollator(model,
 # #                                               tokenizer,
 # #                                               resize="max",
 # #                                               train_on_responses_only=True,
@@ -204,18 +203,20 @@
 
 import os
 from unsloth import FastVisionModel
-from dataloader.intent_dataloader_HF    import get_test_dataset
+from dataloader.intent_dataloader_HF import get_test_dataset
 import json
 from PIL import ImageDraw
 
 model, tokenizer = FastVisionModel.from_pretrained(
-    "/root/Workspace/ImageCropExtractor/outputs_checkpoint/checkpoint-250", # YOUR MODEL YOU USED FOR TRAINING
-    load_in_4bit = True, # Set to False for 16bit LoRA
+    "/root/Workspace/ImageCropExtractor/outputs_checkpoint/checkpoint-250",  # YOUR MODEL YOU USED FOR TRAINING
+    load_in_4bit=True,  # Set to False for 16bit LoRA
 )
 
-FastVisionModel.for_inference(model) # Enable for inference!
+FastVisionModel.for_inference(model)  # Enable for inference!
 
-model.push_to_hub_merged("Singh8898/DiegoCropper", 
-                         tokenizer, 
-                         token = "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",
-                         save_method = "merged_16bit")
+model.push_to_hub_merged(
+    "Singh8898/DiegoCropper",
+    tokenizer,
+    token="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",
+    save_method="merged_16bit",
+)

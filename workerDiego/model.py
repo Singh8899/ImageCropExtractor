@@ -6,11 +6,11 @@ from unsloth import FastVisionModel
 from PIL import ImageDraw
 from PIL import Image, ImageDraw
 
+
 class CropInference:
-    def __init__(self, load_in_4bit=True):
-        self.model, self.tokenizer =  FastVisionModel.from_pretrained(
-            "Singh8898/DiegoCropper", # YOUR MODEL YOU USED FOR TRAINING
-            load_in_4bit = True, # Set to False for 16bit LoRA
+    def __init__(self):
+        self.model, self.tokenizer = FastVisionModel.from_pretrained(
+            "Singh8898/DiegoCropper", load_in_4bit=False
         )
         FastVisionModel.for_inference(self.model)
 
@@ -46,13 +46,13 @@ class CropInference:
         """
 
     def prepare_prompt(self, image):
-            return [
-                {
-                    "role": "system",
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": """You are an advanced vision-language model specialized in annotating images.
+        return [
+            {
+                "role": "system",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": """You are an advanced vision-language model specialized in annotating images.
                             You are a vision-language model. Analyze the provided image and respond **only in JSON** format. 
                             Do not include any explanation, description, or text outside of the JSON
                             Output Format:
@@ -60,21 +60,30 @@ class CropInference:
                                 "y1": top-left y-coordinate
                                 "x1": top-left x-coordinate
                                 "y2": bottom-right y-coordinate
-                                "x2": bottom-right x-coordinate"""
-                        }
-                    ]
-                },
-                {
-                    "role": "user",
-                    "content": [{"type": "image"}, {"type": "text", "text": self.get_prompt(image.height, image.width)}]
-                }
-            ]
+                                "x2": bottom-right x-coordinate""",
+                    }
+                ],
+            },
+            {
+                "role": "user",
+                "content": [
+                    {"type": "image"},
+                    {
+                        "type": "text",
+                        "text": self.get_prompt(image.height, image.width),
+                    },
+                ],
+            },
+        ]
+
     def infer(self, image: str):
         image_bytes = base64.b64decode(image)
         image_pil = Image.open(BytesIO(image_bytes)).convert("RGB")
         prompt = [self.prepare_prompt(image_pil)]
-        
-        input_text = self.tokenizer.apply_chat_template(prompt, add_generation_prompt=True)
+
+        input_text = self.tokenizer.apply_chat_template(
+            prompt, add_generation_prompt=True
+        )
         inputs = self.tokenizer(
             image_pil,
             input_text,
@@ -88,7 +97,7 @@ class CropInference:
         )
 
         text = self.tokenizer.batch_decode(
-            pred_coord[:, inputs["input_ids"].shape[-1]:], skip_special_tokens=True
+            pred_coord[:, inputs["input_ids"].shape[-1] :], skip_special_tokens=True
         )[0]
         print(f"Predicted Text: {text}")
         return json.loads(text)
