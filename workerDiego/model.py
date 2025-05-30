@@ -7,9 +7,9 @@ from PIL import ImageDraw
 from PIL import Image, ImageDraw
 
 class CropInference:
-    def __init__(self, model_path="/root/Workspace/Cropper/checkpoint-660", load_in_4bit=True):
+    def __init__(self, load_in_4bit=True):
         self.model, self.tokenizer =  FastVisionModel.from_pretrained(
-            "/root/Workspace/ImageCropExtractor/outputs_checkpoint/checkpoint-300", # YOUR MODEL YOU USED FOR TRAINING
+            "Singh8898/DiegoCropper", # YOUR MODEL YOU USED FOR TRAINING
             load_in_4bit = True, # Set to False for 16bit LoRA
         )
         FastVisionModel.for_inference(self.model)
