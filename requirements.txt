@@ -1,0 +1,5 @@
+unsloth==2025.5.7
+firebase_admin==7.0.0
+pillow==11.3.0
+trl==0.15.2
+transformers==4.51.3
