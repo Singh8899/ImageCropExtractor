@@ -85,40 +85,6 @@ def prompt(height, width):
         The choice of number of crops (1, 2, or 3) depends on how many distinct important entities are visually identifiable.
     """
 
-
-# def prompt(height, width):
-#     return f"""You are given an image of height {height} and width {width}.
-#     Your task is to extract 1, 2, or 3 rectangular/square crops based on the number and importance of the entities in the image.
-#     The goal is to focus on the most important aspects in the image.
-#     Be aware that the crops will be used for a collage of 1:1 or 3:4 or 4:3 aspect ratio images.
-#     Importance Criteria:
-#         Importance is based on a combination of centrality, face visibility, size in the image, eye contact, and pose.
-#         Avoid overlapping crops unless it's necessary to focus on grouped individuals.
-#     Notes:
-#         Make sure that the coordinates are within the image dimensions.
-#         The choice of number of crops (1, 2, or 3) depends on how many distinct important entities are visually identifiable.
-#     """
-
-# def prompt(height, width):
-#     return f"""
-# You are given an image of dimensions {width}x{height}.
-# Your job is to select 1, 2, or 3 rectangular/square crops that highlight the most important entity(s), so they can be assembled into a final collage at 1:1 aspect ratio.
-
-# Key points:
-# 1. Number of crops: choose 1-3 based on how many distinct, high-importance entities are present.
-# 2. If the crop has as subject a person, it should be CENTERED on their FACE or upper body.
-# 3. Importance factors: centrality, visible faces, size in frame, eye contact, pose, and grouping.
-# 4. Crop placement: avoid overlap unless multiple people or entities are intentionally framed together.
-# 5. Coordinate constraints: all crop boxes must lie fully within the original image bounds.
-# 6. Final collage: selected crops will be arranged to exactly fill a 1:1 canvas collage.
-# Return the crops as a JSON array, where each object contains:
-#     "y1": top-left y-coordinate
-#     "x1": top-left x-coordinate
-#     "y2": bottom-right y-coordinate
-#     "x2": bottom-right x-coordinate
-# """
-
-
 if __name__ == "__main__":
     images_dir = os.path.join(os.getcwd(), "dataset/photo")
     answers_dir = os.path.join(os.getcwd(), "dataset/bounding_boxes")
