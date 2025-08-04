@@ -208,7 +208,7 @@ import json
 from PIL import ImageDraw
 
 model, tokenizer = FastVisionModel.from_pretrained(
-    "/root/Workspace/ImageCropExtractor/outputs_checkpoint/checkpoint-250",  # YOUR MODEL YOU USED FOR TRAINING
+    "/workspace/ImageCropExtractor_2/outputs_checkpoint/checkpoint-250",  # YOUR MODEL YOU USED FOR TRAINING
     load_in_4bit=True,  # Set to False for 16bit LoRA
 )
 

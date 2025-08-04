@@ -9,7 +9,7 @@ class DiegoDataset(Dataset):
     def __init__(self):
         # Assuming dataset/dataset.json is relative to the project root
         dataset_path = os.path.join(
-            "/root/Workspace/ImageCropExtractor/dataset/dataset.json"
+            "/workspace/ImageCropExtractor_2/dataset/dataset.json"
         )
         with open(dataset_path, "r") as json_file:
             self.dataset_list = json.load(json_file)
@@ -19,7 +19,7 @@ class DiegoDataset(Dataset):
 
     def __getitem__(self, idx):
         image_path = os.path.join(
-            "/root/Workspace/ImageCropExtractor/dataset/photo",
+            "/workspace/ImageCropExtractor_2/dataset/photo",
             self.dataset_list[idx]["image"],
         )
         image_pil = Image.open(image_path)
@@ -32,7 +32,7 @@ class TestDataset(Dataset):
     def __init__(self):
         # Assuming dataset/dataset.json is relative to the project root
         dataset_path = os.path.join(
-            "/root/Workspace/ImageCropExtractor/dataset/dataset.json"
+            "/workspace/ImageCropExtractor_2/dataset/dataset.json"
         )
         with open(dataset_path, "r") as json_file:
             self.dataset_list = json.load(json_file)
@@ -42,7 +42,7 @@ class TestDataset(Dataset):
 
     def __getitem__(self, idx):
         image_path = os.path.join(
-            "/root/Workspace/ImageCropExtractor/dataset/photo",
+            "/workspace/ImageCropExtractor_2/dataset/photo",
             self.dataset_list[idx]["image"],
         )
         image_pil = Image.open(image_path)

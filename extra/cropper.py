@@ -5,9 +5,9 @@ from PIL import Image
 from PIL import ImageDraw
 
 image_path = (
-    "/root/Workspace/Qwen2-VL-Finetune/photo-20250519T115650Z-1-001/photo/1.jpg"
+    "/workspace/Qwen2-VL-Finetune/photo-20250519T115650Z-1-001/photo/1.jpg"
 )
-crop = "/root/Workspace/Qwen2-VL-Finetune/testjson.json"
+crop = "/workspace/Qwen2-VL-Finetune/testjson.json"
 
 
 def crop_image(image_path, boxes):
