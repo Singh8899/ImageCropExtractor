@@ -30,6 +30,7 @@ email_validator==2.2.0
 fastapi==0.115.12
 fastapi-cli==0.0.7
 filelock==3.18.0
+firebase_admin==6.1.0
 frozenlist==1.6.0
 fsspec==2025.3.0
 gitdb==4.0.12
@@ -81,7 +82,6 @@ platformdirs==4.3.8
 prettytable==3.16.0
 prompt_toolkit==3.0.51
 propcache==0.3.1
-protobuf==3.20.3
 psutil==7.0.0
 py-cpuinfo==9.0.0
 pyarrow==20.0.0
@@ -119,6 +119,7 @@ tokenizers==0.21.1
 tomli==2.2.1
 tomlkit==0.13.2
 torch==2.7.0
+torchaudio==2.7.0
 torchvision==0.22.0
 tqdm==4.67.1
 tqdm-loggable==0.2
