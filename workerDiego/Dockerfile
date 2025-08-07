@@ -12,7 +12,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application files
 COPY rp_handler.py /
 COPY model.py /
-# COPY DiegoCropper250/ /DiegoCropper250/
 
 # Start the container
 CMD ["python3", "-u", "rp_handler.py"]

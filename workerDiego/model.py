@@ -10,7 +10,7 @@ from PIL import Image, ImageDraw
 class CropInference:
     def __init__(self):
         self.model, self.tokenizer = FastVisionModel.from_pretrained(
-            "Singh8898/DiegoCropper", load_in_4bit=False
+            "gmanuzz/diego_1", load_in_4bit=False
         )
         FastVisionModel.for_inference(self.model)
 
