@@ -1,0 +1,39 @@
+# Dockerfile per Load Balancing Endpoint su RunPod
+FROM runpod/pytorch:2.4.0-py3.11-cuda12.4.1-devel-ubuntu22.04
+
+# Imposta variabili d'ambiente
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PORT=8000
+
+# Fix per bitsandbytes e CUDA
+ENV BNB_CUDA_VERSION=124
+ENV CUDA_HOME=/usr/local/cuda
+ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
+ENV PATH=/usr/local/cuda/bin:$PATH
+
+# Crea directory di lavoro
+WORKDIR /app
+
+# Copia e installa dipendenze
+COPY requirements.txt /app/
+
+# Fix per bitsandbytes - reinstalla con CUDA support
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip uninstall -y bitsandbytes && \
+    pip install --no-cache-dir bitsandbytes --no-deps && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Copia i file dell'applicazione
+COPY model.py /app/
+COPY rp_handler.py /app/
+
+# Esponi la porta
+EXPOSE $PORT
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=30s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:$PORT/ping || exit 1
+
+# Comando di avvio
+CMD ["python", "-u", "rp_handler.py"]

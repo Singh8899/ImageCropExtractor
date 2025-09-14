@@ -1,29 +1,38 @@
-import runpod
+from fastapi import FastAPI
+from pydantic import BaseModel
 from model import CropInference
-import json
+import uvicorn
+import os
+from typing import Dict, Any
+
+app = FastAPI()
+
+cropper = CropInference()
 
 
-def handler(event):
-    #   This function processes incoming requests to your Serverless endpoint.
-    #
-    #    Args:
-    #        event (dict): Contains the input data and request metadata
-    #
-    #    Returns:
-    #       Any: The result to be returned to the client
-
-    # Extract input data
-    print(f"Worker Start")
-    input = event["input"]
-
-    image = input["image"]
-
-    bboxes = cropper.infer(image)
-
-    return bboxes
+class InputData(BaseModel):
+    image: str
 
 
-# Start the Serverless function when the script is run
+class RunPodRequest(BaseModel):
+    input: InputData
+
+
+@app.post("/")
+async def predict(request: RunPodRequest):
+    """Main endpoint for predictions"""
+    try:
+        result = cropper.infer(request.input.image)
+        return {"result": result}
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@app.get("/ping")
+async def ping():
+    """Health check endpoint"""
+    return {"status": "healthy"}
+
 if __name__ == "__main__":
-    cropper = CropInference()
-    runpod.serverless.start({"handler": handler})
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
