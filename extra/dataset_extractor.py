@@ -1,5 +1,5 @@
-import zipfile
 import os
+import zipfile
 
 
 def extract_zip(zip_path, extract_to=None):

@@ -1,11 +1,12 @@
-import firebase_admin
 import json
-from firebase_admin import credentials, storage, firestore
 import os
+import random
 import xml.etree.ElementTree as ET
 from datetime import datetime
+
+import firebase_admin
+from firebase_admin import credentials, firestore, storage
 from PIL import Image
-import random
 
 cred = credentials.Certificate("secret.json")
 firebase_admin.initialize_app(cred, {

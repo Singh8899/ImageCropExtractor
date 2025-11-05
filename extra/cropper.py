@@ -1,8 +1,8 @@
-import json
 import argparse
+import json
 import os
-from PIL import Image
-from PIL import ImageDraw
+
+from PIL import Image, ImageDraw
 
 image_path = (
     "/workspace/Qwen2-VL-Finetune/photo-20250519T115650Z-1-001/photo/1.jpg"

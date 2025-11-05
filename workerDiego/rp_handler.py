@@ -1,9 +1,10 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
-from model import CropInference
-import uvicorn
 import os
-from typing import Dict, Any
+from typing import Any, Dict
+
+import uvicorn
+from fastapi import FastAPI
+from model import CropInference
+from pydantic import BaseModel
 
 app = FastAPI()
 

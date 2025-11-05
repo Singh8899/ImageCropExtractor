@@ -1,10 +1,10 @@
 import base64
-from io import BytesIO
-import os
 import json
-from unsloth import FastVisionModel
-from PIL import ImageDraw
+import os
+from io import BytesIO
+
 from PIL import Image, ImageDraw
+from unsloth import FastVisionModel
 
 
 class CropInference:

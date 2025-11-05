@@ -1,8 +1,9 @@
-import os
-import torch
 import json
-from torch.utils.data import Dataset
+import os
+
+import torch
 from PIL import Image
+from torch.utils.data import Dataset
 
 
 class DiegoDataset(Dataset):

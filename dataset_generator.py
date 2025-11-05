@@ -1,6 +1,7 @@
-import os
-import json
 import argparse
+import json
+import os
+
 from PIL import Image
 
 
