@@ -7,12 +7,13 @@ from torch.utils.data import Dataset
 
 
 class DiegoDataset(Dataset):
-    def __init__(self):
+    def __init__(self, dataset_path):
         # Assuming dataset/dataset.json is relative to the project root
-        dataset_path = os.path.join(
-            "/workspace/ImageCropExtractor_2/dataset/dataset.json"
+        self.dataset_path = dataset_path
+        dataset_path_file = os.path.join(
+            dataset_path, "dataset.json"
         )
-        with open(dataset_path, "r") as json_file:
+        with open(dataset_path_file, "r") as json_file:
             self.dataset_list = json.load(json_file)
 
     def __len__(self):
@@ -20,7 +21,8 @@ class DiegoDataset(Dataset):
 
     def __getitem__(self, idx):
         image_path = os.path.join(
-            "/workspace/ImageCropExtractor_2/dataset/photo",
+            self.dataset_path,
+            "photo",
             self.dataset_list[idx]["image"],
         )
         image_pil = Image.open(image_path)
@@ -30,10 +32,11 @@ class DiegoDataset(Dataset):
 
 
 class TestDataset(Dataset):
-    def __init__(self):
+    def __init__(self, dataset_path):
         # Assuming dataset/dataset.json is relative to the project root
-        dataset_path = os.path.join(
-            "/workspace/ImageCropExtractor_2/dataset/dataset.json"
+        self.dataset_path = dataset_path
+        dataset_path_file = os.path.join(
+            dataset_path, "dataset.json"
         )
         with open(dataset_path, "r") as json_file:
             self.dataset_list = json.load(json_file)
@@ -43,7 +46,8 @@ class TestDataset(Dataset):
 
     def __getitem__(self, idx):
         image_path = os.path.join(
-            "/workspace/ImageCropExtractor_2/dataset/photo",
+            self.dataset_path,
+            "photo",
             self.dataset_list[idx]["image"],
         )
         image_pil = Image.open(image_path)
@@ -52,8 +56,8 @@ class TestDataset(Dataset):
         return image_pil, prompt, answer
 
 
-def get_train_val_datasets(split_ratio=0.967):
-    dataset = DiegoDataset()
+def get_train_val_datasets(dataset_path, split_ratio=0.9):
+    dataset = DiegoDataset(dataset_path)
     train_size = int(len(dataset) * split_ratio)
     val_size = len(dataset) - train_size
     torch.manual_seed(69)
@@ -63,8 +67,8 @@ def get_train_val_datasets(split_ratio=0.967):
     return train_dataset, val_dataset
 
 
-def get_test_dataset(split_ratio=0.967):
-    dataset = TestDataset()
+def get_test_dataset(dataset_path, split_ratio=0.9):
+    dataset = TestDataset(dataset_path)
     train_size = int(len(dataset) * split_ratio)
     val_size = len(dataset) - train_size
     torch.manual_seed(69)

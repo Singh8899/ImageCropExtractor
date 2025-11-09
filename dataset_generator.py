@@ -89,4 +89,6 @@ if __name__ == "__main__":
     images_dir = os.path.join(os.getcwd(), "dataset/photo")
     answers_dir = os.path.join(os.getcwd(), "dataset/bounding_boxes")
     output_file = os.path.join(os.getcwd(), "dataset/dataset.json")
+    if os.path.exists(output_file):
+        os.remove(output_file)
     generate_dataset(images_dir, answers_dir, output_file)

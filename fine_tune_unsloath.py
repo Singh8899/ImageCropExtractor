@@ -1,51 +1,18 @@
-import argparse
-
-from transformers import EarlyStoppingCallback
-from trl import SFTConfig, SFTTrainer
-from unsloth import FastVisionModel  # FastLanguageModel for LLMs
+from unsloth import FastVisionModel 
 from unsloth import is_bf16_supported
 from unsloth.trainer import UnslothVisionDataCollator
 
+import argparse
+
+from transformers import EarlyStoppingCallback
+from trl import SFTTrainer, SFTConfig
+
 from dataloader.intent_dataloader_HF import get_train_val_datasets
-
-
-def prepare_prompt(prompt, gt, image):
-    return [
-        {
-            "role": "system",
-            "content": [
-                {
-                    "type": "text",
-                    "text": """You are an advanced vision-language model specialized in annotating images.
-                    You are a vision-language model. Analyze the provided image and respond **only in JSON** format. 
-                    Do not include any explanation, description, or text outside of the JSON
-                    Output Format:
-                    Return the crops as a JSON array, where each object contains:
-                        "y1": top-left y-coordinate
-                        "x1": top-left x-coordinate
-                        "y2": bottom-right y-coordinate
-                        "x2": bottom-right x-coordinate""",
-                }
-            ],
-        },
-        {
-            "role": "user",
-            "content": [
-                {"type": "image", "image": image},
-                {"type": "text", "text": prompt},
-            ],
-        },
-        {
-            "role": "assistant",
-            "content": [{"type": "text", "text": gt}],
-        },
-    ]
-
 
 def train(output_model_path, token):
 
     model, tokenizer = FastVisionModel.from_pretrained(
-        "unsloth/Qwen2.5-VL-7B-Instruct-bnb-4bit",
+        "unsloth/Qwen3-VL-8B-Instruct",
         load_in_4bit=True,  # Use 4bit to reduce memory use. False for 16bit LoRA.
         use_gradient_checkpointing=False,  # True or "unsloth" for long context
         max_seq_length=50000,  # Set to a large number for long context
@@ -66,13 +33,16 @@ def train(output_model_path, token):
         loftq_config=None,  # And LoftQ
     )
 
-    processed_dataset_train, processed_dataset_test = get_train_val_datasets()
+    processed_dataset_train, processed_dataset_test = get_train_val_datasets(
+        dataset_path = "/workspace/ImageCropExtractor/dataset",
+        split_ratio=0.9
+    )
 
     FastVisionModel.for_training(model)  # Enable for training!
 
     trainer = SFTTrainer(
         model=model,
-        tokenizer=tokenizer,
+        processing_class=tokenizer,
         data_collator=UnslothVisionDataCollator(
             model,
             tokenizer,
@@ -109,7 +79,7 @@ def train(output_model_path, token):
             dataset_text_field="",
             dataset_kwargs={"skip_prepare_dataset": True},
             dataset_num_proc=8,
-            max_seq_length=10000,
+            max_length=10000,
             save_strategy="best",
             metric_for_best_model="eval_loss",
             greater_is_better=False,
@@ -128,8 +98,8 @@ def train(output_model_path, token):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-o", type=str, required=True, help="Path to the output model")
-    parser.add_argument("-t", type=str, required=True, help="Hugging Face token for model upload")
+    parser.add_argument("-o", type=str, help="Path to the output model", default="Singh8898/test")
+    parser.add_argument("-t", type=str, help="Hugging Face token for model upload", default="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")
     args = parser.parse_args()
     train(args.o, args.t)
 
