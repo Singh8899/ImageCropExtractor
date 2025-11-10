@@ -212,3 +212,5 @@ dataset/
 nuovo_dataset.zip
 dataset_orig.zip
 Jaspi/
+unsloth_compiled_cache/
+wandb/

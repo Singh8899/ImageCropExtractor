@@ -55,7 +55,7 @@ def train(output_model_path, token):
         eval_dataset=processed_dataset_test,
         callbacks=[EarlyStoppingCallback(early_stopping_patience=3)],
         args=SFTConfig(
-            per_device_train_batch_size=8,
+            per_device_train_batch_size=6,
             per_device_eval_batch_size=4,  # Batch size for evaluation
             do_eval=True,
             do_train=True,
