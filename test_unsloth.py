@@ -2,6 +2,8 @@ import json
 import os
 
 from PIL import ImageDraw
+import PIL.Image
+LANCZOS = PIL.Image.Resampling.LANCZOS
 from unsloth import FastVisionModel
 
 from dataloader.intent_dataloader_HF import get_test_dataset
@@ -37,7 +39,7 @@ def prepare_prompt(prompt, gt):
     ]
 
 
-_, dataset_test = get_test_dataset()
+_, dataset_test = get_test_dataset("/workspace/ImageCropExtractor/dataset")
 processed_dataset_test = [
     (prepare_prompt(prompt, answer), image_pil)
     for image_pil, prompt, answer in dataset_test
@@ -45,7 +47,7 @@ processed_dataset_test = [
 
 
 model, tokenizer = FastVisionModel.from_pretrained(
-    "Singh8898/DiegoCropper",  # YOUR MODEL YOU USED FOR TRAINING
+    "Singh8898/Diego",  # YOUR MODEL YOU USED FOR TRAINING
     load_in_4bit=True,  # Set to False for 16bit LoRA
 )
 
@@ -53,6 +55,12 @@ FastVisionModel.for_inference(model)  # Enable for inference!
 for i, pack in enumerate(processed_dataset_test):
     prompt, image_pil = pack
     messages = [prompt[:2]]
+    height = image_pil.height
+    width = image_pil.width
+    scale = 1280 / max(height, width)
+    new_height = int(height * scale)
+    new_width = int(width * scale)
+    image_pil = image_pil.resize((new_width, new_height), LANCZOS)
 
     gt = prompt[2]["content"][0]["text"]
     input_text = tokenizer.apply_chat_template(messages, add_generation_prompt=True)

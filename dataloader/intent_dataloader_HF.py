@@ -38,7 +38,7 @@ class TestDataset(Dataset):
         dataset_path_file = os.path.join(
             dataset_path, "dataset.json"
         )
-        with open(dataset_path, "r") as json_file:
+        with open(dataset_path_file, "r") as json_file:
             self.dataset_list = json.load(json_file)
 
     def __len__(self):
