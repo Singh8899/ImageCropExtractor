@@ -1,108 +1,105 @@
-# 🚀 ImageCropExtractor
+# 🚀 Image-Crop-Extractor
 
-Questa guida ti accompagna attraverso tutto il processo: dal training del
-modello fino al deployment su RunPod Serverless.
+This guide walks you through the entire process: from training the model to deploying it on RunPod Serverless.
 
-## 📋 Prerequisiti
+## 📋 Prerequisites
 
-- **Python 3.11** (gestito con pyenv)
-- **CUDA GPU** (per training e inference)
-- **Account Hugging Face** con token di accesso
-- **Account Docker Hub**
-- **Account RunPod**
+- **Python 3.11** (managed with pyenv)
+- **CUDA GPU** (for training and inference)
+- **Hugging Face account** with access token
+- **Docker Hub account**
+- **RunPod account**
 - **Firebase credentials** (`secret.json`)
 
-## 🔧 Setup Iniziale
+## 🔧 Initial Setup
 
-### 1. Configurazione Ambiente Python
+### 1. Python Environment Configuration
 
 ```bash
-# Installa Python 3.11 con pyenv (se non già presente)
+# Install Python 3.11 with pyenv (if not already installed)
 pyenv install 3.11.9
 pyenv activate torch-env
 pip install -r requirements.txt
 ```
 
-### 2. Configurazione Firebase
+### 2. Firebase Configuration
 
-Assicurati di avere il file `secret.json` con le credenziali Firebase nella root
-del progetto.
+Ensure you have the `secret.json` file with Firebase credentials in the root of the project.
 
-## 🎯 Workflow Completo
+## 🎯 Complete Workflow
 
-### Fase 1: Preparazione Dataset
+### Phase 1: Dataset Preparation
 
-#### Step 1.1: Download delle Foto da Firebase
+#### Step 1.1: Download Photos from Firebase
 
 ```bash
 python download_photo.py
 ```
 
-**Cosa fa**: Scarica le immagini e i bounding boxes dal Firebase Storage nelle
-cartelle:
+**What it does**: Downloads images and bounding boxes from Firebase Storage into the following folders:
 
-- `dataset/photo/` - Immagini
-- `dataset/bounding_boxes/` - Annotazioni XML
+- `dataset/photo/` - Images
+- `dataset/bounding_boxes/` - XML annotations
 
-#### Step 1.2: Generazione Metadata Dataset
+#### Step 1.2: Generate Dataset Metadata
 
 ```bash
 python dataset_generator.py
 ```
 
-**Cosa fa**: Crea il file `dataset.json` che contiene:
+**What it does**: Creates the `dataset.json` file containing:
 
-- Percorsi delle immagini
-- Prompt di training
-- Coordinate dei crop target
-- Metadati per il fine-tuning
+- Image paths
+- Training prompts
+- Target crop coordinates
+- Metadata for fine-tuning
 
-### Fase 2: Training del Modello
+### Phase 2: Model Training
 
-#### Step 2.1: Esecuzione Training
+#### Step 2.1: Run Training
 
 ```bash
 jupyter notebook train.ipynb
 python fine_tune_unsloath.py
 ```
 
-**Cosa succede durante il training**:
+**What happens during training**:
 
-- Caricamento del modello base (Llama-3.2-11B-Vision)
-- Fine-tuning con i dati del dataset
-- Salvataggio checkpoint in `outputs_checkpoint/`
-- Il training può richiedere diverse ore su GPU
+- Loads the base model (Llama-3.2-11B-Vision)
+- Fine-tunes it with the dataset
+- Saves checkpoints in `outputs_checkpoint/`
+- Training may take several hours on a GPU
 
-#### Step 2.2: Monitoraggio Training
+#### Step 2.2: Monitor Training
 
-Il training salva checkpoint periodici in:
+Training saves periodic checkpoints in:
 
 ```
 outputs_checkpoint/
 ├── checkpoint-100/
 ├── checkpoint-200/
 ├── ...
-└── checkpoint-950/  # Checkpoint finale
+└── checkpoint-950/  # Final checkpoint
 ```
 
-### Fase 3: Upload Modello su Hugging Face
+### Phase 3: Upload Model to Hugging Face
 
-#### Step 3.1: Upload del Modello Trainato
+#### Step 3.1: Upload the Trained Model
 
 ```bash
 python upload_model.py \
   -c "outputs_checkpoint/checkpoint-950" \
-  -o "tuousername/nome-modello" \
-  -t "hf_TUO_TOKEN_HUGGINGFACE"
+  -o "yourusername/model-name" \
+  -t "hf_YOUR_HUGGINGFACE_TOKEN"
 ```
 
-**Parametri**:
+**Parameters**:
 
-- `-c`: Path al checkpoint da uploadare
-- `-o`: Nome del repository su HF (formato: username/model-name)
-- `-t`: Token Hugging Face
+- `-c`: Path to the checkpoint to upload
+- `-o`: Name of the repository on HF (format: username/model-name)
+- `-t`: Hugging Face token
 
-**Esempio**:
+**Example**:
 
 ```bash
 python upload_model.py \
@@ -111,41 +108,41 @@ python upload_model.py \
   -t "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"
 ```
 
-### Fase 4: Aggiornamento Codice Worker
+### Phase 4: Update Worker Code
 
-#### Step 4.1: Aggiorna il Modello nel Worker
+#### Step 4.1: Update the Model in the Worker
 
-Modifica il file `workerDiego/model.py` alla riga 13:
+Edit the `workerDiego/model.py` file at line 13:
 
 ```python
-# Prima (modello vecchio)
+# Before (old model)
 self.model, self.tokenizer = FastVisionModel.from_pretrained(
     "gmanuzz/diego_1", load_in_4bit=False
 )
 
-# Dopo (nuovo modello)
+# After (new model)
 self.model, self.tokenizer = FastVisionModel.from_pretrained(
-    "gmanuzz/diego_2", load_in_4bit=False  # <-- Cambia qui
+    "gmanuzz/diego_2", load_in_4bit=False  # <-- Update here
 )
 ```
 
-### Fase 5: Build e Push Docker
+### Phase 5: Build and Push Docker
 
-#### Step 5.1: Build del Container
+#### Step 5.1: Build the Container
 
 ```bash
 cd workerDiego
-docker build . --tag=tuousername/imagecropextractor:latest
+docker build . --tag=yourusername/imagecropextractor:latest
 ```
 
-#### Step 5.2: Login e Push su Docker Hub
+#### Step 5.2: Login and Push to Docker Hub
 
 ```bash
 docker login
-docker push tuousername/imagecropextractor:latest
+docker push yourusername/imagecropextractor:latest
 ```
 
-**Esempio completo**:
+**Complete Example**:
 
 ```bash
 cd workerDiego
@@ -154,55 +151,55 @@ docker login
 docker push giuliomanuzzi001/imagecropextractor:latest
 ```
 
-### Fase 6: Deployment su RunPod
+### Phase 6: Deployment on RunPod
 
-#### 🔄 Scelta del Tipo di Deployment
+#### 🔄 Deployment Type Selection
 
-Questo progetto supporta due tipi di deployment:
+This project supports two deployment types:
 
-**🎯 Load Balancing (Raccomandato per produzione)**
+**🎯 Load Balancing (Recommended for production)**
 
-- Server HTTP sempre attivo
-- Migliori performance per richieste frequenti
-- Scaling automatico basato sul carico
-- Health checks integrati
-- Latenza più bassa
+- Always-on HTTP server
+- Better performance for frequent requests
+- Automatic scaling based on load
+- Integrated health checks
+- Lower latency
 
-**⚡ Serverless (Per uso sporadico)**
+**⚡ Serverless (For occasional use)**
 
-- Attivazione on-demand
-- Costi ridotti per uso occasionale
-- Cold start più lento
+- On-demand activation
+- Reduced costs for occasional use
+- Slower cold start
 
 ---
 
-## 🎯 Deployment Load Balancing (Raccomandato)
+## 🎯 Load Balancing Deployment (Recommended)
 
-### Step 6A.1: Build Immagine Load Balancing
+### Step 6A.1: Build Load Balancing Image
 
 ```bash
 cd workerDiego
 
-# 🎯 Build e deploy Load Balancing
+# 🎯 Build and deploy Load Balancing
 ./build_loadbalancer.sh
 
-# Oppure manualmente:
+# Or manually:
 docker build -f Dockerfile.loadbalancer -t giuliomanuzzi001/imagecropextractor-loadbalancer:latest .
 docker push giuliomanuzzi001/imagecropextractor-loadbalancer:latest
 ```
 
-### Step 6A.2: Crea Load Balancing Endpoint
+### Step 6A.2: Create Load Balancing Endpoint
 
-1. Vai su: https://console.runpod.io/endpoints
-2. Clicca "New Endpoint"
-3. Seleziona "Load Balancing"
-4. Compila:
+1. Go to: https://console.runpod.io/endpoints
+2. Click "New Endpoint"
+3. Select "Load Balancing"
+4. Fill in:
    - **Endpoint Name**: `ImageCropExtractor-LoadBalancer`
    - **Docker Image**: `giuliomanuzzi001/imagecropextractor-loadbalancer:latest`
    - **Container Disk**: `24 GB`
    - **Volume Disk**: `60 GB`
    - **Port**: `8000`
-   - **GPU Type**: `RTX A4000` o superiore
+   - **GPU Type**: `RTX A4000` or higher
    - **Min Workers**: `1`
    - **Max Workers**: `3`
 
@@ -210,10 +207,10 @@ docker push giuliomanuzzi001/imagecropextractor-loadbalancer:latest
 
 ```bash
 # Test health check
-curl https://TUO_ENDPOINT_ID.api.runpod.ai/ping
+curl https://YOUR_ENDPOINT_ID.api.runpod.ai/ping
 
-# Test predizione
-curl -X POST https://TUO_ENDPOINT_ID.api.runpod.ai/ \
+# Test prediction
+curl -X POST https://YOUR_ENDPOINT_ID.api.runpod.ai/ \
   -H "Content-Type: application/json" \
   -d '{
     "input": {
@@ -222,7 +219,7 @@ curl -X POST https://TUO_ENDPOINT_ID.api.runpod.ai/ \
   }'
 ```
 
-**Formato risposta:**
+**Response format:**
 
 ```json
 {
@@ -239,59 +236,59 @@ curl -X POST https://TUO_ENDPOINT_ID.api.runpod.ai/ \
 
 ---
 
-## ⚡ Deployment Serverless (Alternativo)
+## ⚡ Serverless Deployment (Alternative)
 
-### Step 6B.1: Build Immagine Serverless
+### Step 6B.1: Build Serverless Image
 
 ```bash
 cd workerDiego
 
-# ⚡ Build e deploy Serverless
+# ⚡ Build and deploy Serverless
 ./build_serverless.sh
 
-# Oppure manualmente:
+# Or manually:
 docker build -f Dockerfile -t giuliomanuzzi001/imagecropextractor:latest .
 docker push giuliomanuzzi001/imagecropextractor:latest
 ```
 
-### Step 6B.2: Crea Template Serverless
+### Step 6B.2: Create Serverless Template
 
-1. Vai su: https://console.runpod.io/serverless/user/templates
-2. Clicca "New Template"
-3. Compila:
+1. Go to: https://console.runpod.io/serverless/user/templates
+2. Click "New Template"
+3. Fill in:
    - **Template Name**: `ImageCropExtractor-Serverless`
    - **Container Image**: `giuliomanuzzi001/imagecropextractor:latest`
    - **Container Disk**: `24 GB`
    - **Volume Disk**: `60 GB`
 
-### Step 6B.3: Crea API Endpoint Serverless
+### Step 6B.3: Create Serverless API Endpoint
 
-1. Vai su: https://console.runpod.io/serverless/user/apis
-2. Clicca "New API"
-3. Compila:
+1. Go to: https://console.runpod.io/serverless/user/apis
+2. Click "New API"
+3. Fill in:
    - **API Name**: `ImageCropExtractor-Serverless`
    - **Select Template**: `ImageCropExtractor-Serverless`
    - **Min Workers**: `0`
    - **Max Workers**: `3`
-   - **Idle Timeout**: `5` secondi
-   - **Flash Boot**: ✅ Abilitato
-   - **GPU Type**: `RTX A4000` o superiore
+   - **Idle Timeout**: `5` seconds
+   - **Flash Boot**: ✅ Enabled
+   - **GPU Type**: `RTX A4000` or higher
 
 ### Step 6B.4: Test Serverless API
 
 ```bash
-# Con script Python (raccomandato)
-python test_serverless_api.py TUO_ENDPOINT_ID TUO_RUNPOD_TOKEN
+# Using Python script (recommended)
+python test_serverless_api.py YOUR_ENDPOINT_ID YOUR_RUNPOD_TOKEN
 
-# Con variabili d'ambiente
-export RUNPOD_ENDPOINT_ID=TUO_ENDPOINT_ID
-export RUNPOD_API_TOKEN=TUO_RUNPOD_TOKEN
+# Using environment variables
+export RUNPOD_ENDPOINT_ID=YOUR_ENDPOINT_ID
+export RUNPOD_API_TOKEN=YOUR_RUNPOD_TOKEN
 python test_serverless_api.py
 
-# Con curl (manuale)
-curl -X POST https://api.runpod.ai/v2/TUO_ENDPOINT_ID/runsync \
+# Using curl (manual)
+curl -X POST https://api.runpod.ai/v2/YOUR_ENDPOINT_ID/runsync \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer TUO_RUNPOD_TOKEN" \
+  -H "Authorization: Bearer YOUR_RUNPOD_TOKEN" \
   -d '{
     "input": {
       "image": "BASE64_ENCODED_IMAGE_STRING"
@@ -299,7 +296,7 @@ curl -X POST https://api.runpod.ai/v2/TUO_ENDPOINT_ID/runsync \
   }'
 ```
 
-**Formato risposta serverless:**
+**Serverless response format:**
 
 ```json
 {
