@@ -4,7 +4,7 @@ import os
 from PIL import Image
 
 
-def generate_dataset(images_dir, answers_dir, output_file):
+def generate_dataset(images_dir, answers_dir, output_file, max_dimension):
     entries = []
 
     # Get sorted list of image files assuming they are .jpg files.
@@ -38,9 +38,11 @@ def generate_dataset(images_dir, answers_dir, output_file):
                 new_coord["x2"] = min(new_coord["x1"] + coord["width"], width)
                 new_coord["y2"] = min(new_coord["y1"] + coord["height"], height)
                 new_coords.append(new_coord)
+            height, width, new_coords =  resizer(height, width, new_coords, max_dimension)
             answer_text = json.dumps(new_coords, ensure_ascii=False)
 
         # Build the dataset entry
+        
         entry = {
             "id": base_name.zfill(8),
             "image": image_file,
@@ -48,11 +50,44 @@ def generate_dataset(images_dir, answers_dir, output_file):
             "answer": answer_text,
         }
         entries.append(entry)
-
+    
     with open(output_file, "w", encoding="utf-8") as out_f:
         json.dump(entries, out_f, ensure_ascii=False, indent=2)
     print(f"Dataset with {len(entries)} entries has been written to {output_file}")
 
+
+
+def resizer(height, width, new_coords, image_size):
+    """
+    Resize the image dimensions and adjust bounding box coordinates proportionally.
+
+    Args:
+        height (int): Original height of the image.
+        width (int): Original width of the image.
+        new_coords (list): List of bounding box coordinates to adjust.
+        image_size (int): Target size for the larger dimension of the image.
+
+    Returns:
+        tuple: Resized height, resized width, and adjusted bounding box coordinates.
+    """
+    # Calculate the scaling factor to resize the image
+    scale = image_size / max(height, width)
+    new_height = int(height * scale)
+    new_width = int(width * scale)
+
+
+    # Adjust bounding box coordinates proportionally
+    adjusted_coords = []
+    for coord in new_coords:
+        adjusted_coord = {
+            "x1": int(coord["x1"] * scale),
+            "y1": int(coord["y1"] * scale),
+            "x2": int(coord["x2"] * scale),
+            "y2": int(coord["y2"] * scale),
+        }
+        adjusted_coords.append(adjusted_coord)
+
+    return new_height, new_width, adjusted_coords
 
 def prompt(height, width):
     return f"""You are given an image of height {height} and width {width}. Your task is to extract 1, 2, or 3 rectangular/square crops based on the number and importance of the entities in the image. The goal is to focus on the most important aspects in the image. Follow these precise rules:
@@ -89,6 +124,7 @@ if __name__ == "__main__":
     images_dir = os.path.join(os.getcwd(), "dataset/photo")
     answers_dir = os.path.join(os.getcwd(), "dataset/bounding_boxes")
     output_file = os.path.join(os.getcwd(), "dataset/dataset.json")
+    max_dimension = 1280
     if os.path.exists(output_file):
         os.remove(output_file)
-    generate_dataset(images_dir, answers_dir, output_file)
+    generate_dataset(images_dir, answers_dir, output_file, max_dimension)
