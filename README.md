@@ -1,4 +1,4 @@
-# 🚀 Image-Crop-Extractor
+# 🚀 VSIE: VLM-Social-Image-Extractor
 
 This guide walks you through the entire process: from training the model to deploying it on RunPod Serverless.
 
@@ -184,8 +184,8 @@ cd workerDiego
 ./build_loadbalancer.sh
 
 # Or manually:
-docker build -f Dockerfile.loadbalancer -t giuliomanuzzi001/imagecropextractor-loadbalancer:latest .
-docker push giuliomanuzzi001/imagecropextractor-loadbalancer:latest
+docker build -f Dockerfile.loadbalancer -t giuliomanuzzi001/imagecropor-loadbalancer:latest .
+docker push giuliomanuzzi001/imagecropor-loadbalancer:latest
 ```
 
 ### Step 6A.2: Create Load Balancing Endpoint
@@ -194,8 +194,8 @@ docker push giuliomanuzzi001/imagecropextractor-loadbalancer:latest
 2. Click "New Endpoint"
 3. Select "Load Balancing"
 4. Fill in:
-   - **Endpoint Name**: `ImageCropExtractor-LoadBalancer`
-   - **Docker Image**: `giuliomanuzzi001/imagecropextractor-loadbalancer:latest`
+   - **Endpoint Name**: `ImageCropor-LoadBalancer`
+   - **Docker Image**: `giuliomanuzzi001/imagecropor-loadbalancer:latest`
    - **Container Disk**: `24 GB`
    - **Volume Disk**: `60 GB`
    - **Port**: `8000`
@@ -247,8 +247,8 @@ cd workerDiego
 ./build_serverless.sh
 
 # Or manually:
-docker build -f Dockerfile -t giuliomanuzzi001/imagecropextractor:latest .
-docker push giuliomanuzzi001/imagecropextractor:latest
+docker build -f Dockerfile -t giuliomanuzzi001/imagecropor:latest .
+docker push giuliomanuzzi001/imagecropor:latest
 ```
 
 ### Step 6B.2: Create Serverless Template
@@ -256,7 +256,7 @@ docker push giuliomanuzzi001/imagecropextractor:latest
 1. Go to: https://console.runpod.io/serverless/user/templates
 2. Click "New Template"
 3. Fill in:
-   - **Template Name**: `ImageCropExtractor-Serverless`
+   - **Template Name**: `ImageCropor-Serverless`
    - **Container Image**: `giuliomanuzzi001/imagecropextractor:latest`
    - **Container Disk**: `24 GB`
    - **Volume Disk**: `60 GB`
